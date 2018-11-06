@@ -2,6 +2,7 @@ package com.example.tech.coinz;
 
 import android.app.LauncherActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -14,19 +15,32 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.JsonObject;
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.Geometry;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import android.location.Location;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import android.support.annotation.NonNull;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode;
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEnginePriority;
@@ -44,23 +58,32 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener, PermissionsListener {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener, PermissionsListener  {
 
     private static final String TAG = "MapActivity";
 
     private MapView mapView;
+    private MapboxMap map;
+    private Button SettingsBtn, ProfileBtn, BankBtn;
 
     private static final String URL_DATA = "http://homepages.inf.ed.ac.uk/stg/coinz/2019/12/31/coinzmap.geojson";
     private ArrayList<Coin> coinList;
 
 
     // variables for adding location layer
-    private MapboxMap mapboxMap;
+
     private PermissionsManager permissionsManager;
     private LocationLayerPlugin locationLayerPlugin;
     private LocationEngine locationEngine;
     private Location originLocation;
+
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseUser mFirebaseUser;
+
+
+    private ArrayList<Marker> markers;
 
 
 
@@ -68,6 +91,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
         Mapbox.getInstance(MapActivity.this, getString(R.string.access_token));
         setContentView(R.layout.activity_map);
 
@@ -75,56 +99,100 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        coinList = new ArrayList<Coin>();
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+        if(mFirebaseUser == null) {
+            Log.d(TAG, "onCreate: no user");
+            mapView.onDestroy();
+            Intent intent = new Intent(MapActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
 
-//        loadData();
+        coinList = new ArrayList<Coin>();
+        markers = new ArrayList<>();
+        SettingsBtn = (Button) findViewById(R.id.SettingsBtn);
+        BankBtn = (Button) findViewById(R.id.BankBtn);
+        ProfileBtn = (Button) findViewById(R.id.ProfileBtn);
+
+        DownloadTaskFile downloadTaskFile = new DownloadTaskFile();
+        String json = null;
+        try {
+            json = downloadTaskFile.execute("http://homepages.inf.ed.ac.uk/stg/coinz/2019/12/30/coinzmap.geojson").get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "onCreate: " + json);
+
+        getMarkerInfo(json);
+
+        BankBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapActivity.this, BankActivity.class);
+            }
+        });
+
+        SettingsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapActivity.this, SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
-//    private void loadData(){
-//        StringRequest stringRequest = new StringRequest(Request.Method.GET,
-//                URL_DATA,
-//                new Response.Listener<String>() {
-//                    @Override
-//                    public void onResponse(String response) {
-//                        try {
-//                            JSONObject jsonObject = new JSONObject(response);
-//                            JSONArray array = jsonObject.getJSONArray("features");
-//
-//                            for(int i = 0; i<array.length(); i++){
-//                                JSONObject o = array.getJSONObject(i);
-//                                Coin coin = new Coin(
-//                                        o.getString("id"),
-//                                        o.getString("value"),
-//                                        o.getString("currency"),
-//                                        o.getString("marker-symbol"),
-//                                        o.getString("marker-color"));
-//                                coinList.add(i, coin);
-//                                Log.d(TAG, coinList.get(i).getCurrency());
-//                            }
-//
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
-//
-//                    }
-//                }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Toast.makeText(MapActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-//                Log.d(TAG, error.getMessage());
-//            }
-//        });
-//        RequestQueue requestQueue = Volley.newRequestQueue(this);
-//        requestQueue.add(stringRequest);
-//    }
+    private void getMarkerInfo(String json){
+        FeatureCollection fc = FeatureCollection.fromJson(json);
+        List<Feature> features = (List<Feature>) fc.features();
+        Log.d(TAG, "getMarkerInfo: "+ features.get(0).toJson());
+
+        for (Feature feature: features){
+            Point point = (Point) feature.geometry();
+            List<Double> latlng = point.coordinates();
+            JsonObject properties = feature.properties();
+            String id = properties.get("id").getAsString();
+            String value = properties.get("value").getAsString();
+            String currency = properties.get("currency").getAsString();
+            String markerSymbol = properties.get("marker-symbol").getAsString();
+            String markerColor = properties.get("marker-color").getAsString();
+
+            Coin coin = new Coin(id, value, currency, markerSymbol, markerColor, new LatLng(latlng.get(0), latlng.get(1)));
+            coinList.add(coin);
+        }
+    }
+
+
+
 
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
 
-        Log.d(TAG, "onMapReady");
-        this.mapboxMap = mapboxMap;
-        enableLocationPlugin();
+        if(mapboxMap == null){
 
+            Log.d(TAG, "onMapReady: mapBox is null");
+        } else {
+
+            this.map = mapboxMap;
+            map.getUiSettings().setCompassEnabled(true);
+            map.getUiSettings().setZoomControlsEnabled(true);
+            enableLocationPlugin();
+
+            if(coinList != null){
+                Log.d(TAG, "onMapReady: coinlist not null" + coinList.get(0).getCurrency());
+                for (Coin coin: coinList){
+                    Log.d(TAG, "onMapReady: " + coin.getLatLng().toString());
+
+                    //THIS IS WEIRD TRY AND FIND OUT WHY IT GETS THE LAT AND LONG THE WROND WAY ROUND.
+                    LatLng coinPosition = new LatLng(coin.getLatLng().getLongitude(), coin.getLatLng().getLatitude(), 0.0);
+                    markers.add(map.addMarker(new MarkerOptions().setPosition(coinPosition)));
+                }
+            }
+        }
 
     }
 
@@ -140,7 +208,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             initializeLocationEngine();
             // Create an instance of the plugin. Adding in LocationLayerOptions is also an optional
             // parameter
-            LocationLayerPlugin locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap);
+            LocationLayerPlugin locationLayerPlugin = new LocationLayerPlugin(mapView, map);
 
             // Set the plugin's camera mode
             locationLayerPlugin.setCameraMode(CameraMode.TRACKING);
@@ -165,6 +233,23 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             locationEngine.addLocationEngineListener(this);
         }
     }
+
+    @SuppressWarnings("MissingPermission")
+    private void initializeLocationLayer(){
+        if (mapView == null){
+            Log.d(TAG, "map view is null");
+        } else{
+            if (map == null){
+                Log.d(TAG, "mapbox map is null");
+            } else{
+                locationLayerPlugin = new LocationLayerPlugin(mapView, map, locationEngine);
+                locationLayerPlugin.setLocationLayerEnabled(true);
+                locationLayerPlugin.setCameraMode(CameraMode.TRACKING);
+                locationLayerPlugin.setRenderMode(RenderMode.NORMAL);
+            }
+        }
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -235,6 +320,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mapView.onLowMemory();
     }
 
+
     @Override
     public void onConnected() {
 
@@ -245,31 +331,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     }
 
-//    Irrelevant code come back and figure out how to download and parse GeoJSON files form the server
-//    private static String convertStreamToString(InputStream is) throws Exception {
-//
-//        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-//
-//        StringBuilder sb = new StringBuilder();
-//        String line = null;
-//
-//        while ((line = reader.readLine()) != null) {
-//            sb.append(line).append("\n");
-//        }
-//
-//        reader.close();
-//        return sb.toString();
-//    }
-//
-//    public static String getStringFromFile(Uri fileUri, Context context) throws Exception {
-//
-//        InputStream fin = context.getContentResolver().openInputStream(fileUri);
-//
-//        String ret = convertStreamToString(fin);
-//
-//        fin.close();
-//        return ret;
-//    }
 
 
 

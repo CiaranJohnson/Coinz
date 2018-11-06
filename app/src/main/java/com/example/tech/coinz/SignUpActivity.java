@@ -10,12 +10,18 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.rengwuxian.materialedittext.MaterialEditText;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -26,6 +32,8 @@ public class SignUpActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 
     @Override
@@ -94,17 +102,43 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     public void updateUI(final FirebaseUser currentUser){
+
+
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if(currentUser!=null){
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if(user !=null){
+                    Log.d(TAG, "user is not null");
                     UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                             .setDisplayName(metName.getText().toString()).build();
-                    currentUser.updateProfile(profileUpdates);
-                    Intent intent = new Intent(SignUpActivity.this, MapActivity.class);
-                    startActivity(intent);
+                    user.updateProfile(profileUpdates);
+
+                    Map<String, Object> userInfo = new HashMap<>();
+                    String displayName = metName.getText().toString();
+                    Log.d(TAG, "name of user is " + displayName);
+                    userInfo.put("Bank", 0);
+                    userInfo.put("DisplayName", displayName);
+                    db.collection("user").document(user.getUid()).set(userInfo)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "onSuccess: Successfully added user info to firestore db");
+                                    Intent intent = new Intent(SignUpActivity.this, MapActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "onFailure: " + e.getMessage());
+                        }
+                    });
+                } else {
+                    Log.d(TAG, "onAuthStateChanged: user was null");
                 }
             }
         };
+
     }
 }
