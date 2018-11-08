@@ -17,6 +17,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
@@ -117,23 +118,30 @@ public class SignUpActivity extends AppCompatActivity {
                     Map<String, Object> userInfo = new HashMap<>();
                     String displayName = metName.getText().toString();
                     Log.d(TAG, "name of user is " + displayName);
-                    userInfo.put("Bank", 0);
+
+
                     userInfo.put("DisplayName", displayName);
-                    db.collection("user").document(user.getUid()).set(userInfo)
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    Log.d(TAG, "onSuccess: Successfully added user info to firestore db");
-                                    Intent intent = new Intent(SignUpActivity.this, MapActivity.class);
-                                    startActivity(intent);
-                                    finish();
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
+                    userInfo.put("Bank", 0);
+                    userInfo.put("WalletCount", 0);
+
+
+
+                    db.collection("App").document("User").collection(user.getUid()).document("User Info").set(userInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "onSuccess: Successfully added user info to firestore db");
+                            Intent intent = new Intent(SignUpActivity.this, MapActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "onFailure: " + e.getMessage());
+                            Log.e(TAG, "onFailure: " + e.getMessage() );
                         }
                     });
+
+
                 } else {
                     Log.d(TAG, "onAuthStateChanged: user was null");
                 }

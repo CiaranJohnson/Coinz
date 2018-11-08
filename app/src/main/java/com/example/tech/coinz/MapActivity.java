@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
+import android.support.annotation.IntegerRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -15,8 +16,15 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.JsonObject;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
@@ -57,10 +65,12 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener, PermissionsListener  {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener, PermissionsListener, MapboxMap.OnMarkerClickListener {
 
     private static final String TAG = "MapActivity";
 
@@ -70,6 +80,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private static final String URL_DATA = "http://homepages.inf.ed.ac.uk/stg/coinz/2019/12/31/coinzmap.geojson";
     private ArrayList<Coin> coinList;
+    private Integer walletCount;
 
 
     // variables for adding location layer
@@ -81,6 +92,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 
     private ArrayList<Marker> markers;
@@ -144,6 +156,14 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
 
+        ProfileBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void getMarkerInfo(String json){
@@ -180,6 +200,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             this.map = mapboxMap;
             map.getUiSettings().setCompassEnabled(true);
             map.getUiSettings().setZoomControlsEnabled(true);
+            map.setOnMarkerClickListener(this);
             enableLocationPlugin();
 
             if(coinList != null){
@@ -189,7 +210,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                     //THIS IS WEIRD TRY AND FIND OUT WHY IT GETS THE LAT AND LONG THE WROND WAY ROUND.
                     LatLng coinPosition = new LatLng(coin.getLatLng().getLongitude(), coin.getLatLng().getLatitude(), 0.0);
-                    markers.add(map.addMarker(new MarkerOptions().setPosition(coinPosition)));
+                    markers.add(map.addMarker(new MarkerOptions().setPosition(coinPosition).setTitle(coin.getCurrency())));
                 }
             }
         }
@@ -328,10 +349,61 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
+        if (location == null){
+            Log.d(TAG, "onLocationChanged: Location is null");
+        } else {
+            Log.d(TAG, "onLocationChanged: Location has been changed");
+            for (Marker marker: markers){
+                collectCoin(location, marker);
+            }
+        }
+    }
 
+
+    private void collectCoin(Location location, Marker marker){
+        Double latitude = location.getLatitude();
+        Double longitude = location.getLongitude();
+        LatLng userLatLng = new LatLng(latitude, longitude);
+
+
+        if(marker.getPosition().distanceTo(userLatLng)<10){
+            Toast.makeText(getApplicationContext(), "Coin collected" + marker, Toast.LENGTH_LONG).show();
+
+            for (int i = 0; i<markers.size(); i++){
+                if (marker.getId() == markers.get(i).getId()){
+                    Coin coin = coinList.get(i);
+                    addCoinToWallet(coin, marker);
+                }
+            }
+        }
+    }
+
+    private void addCoinToWallet(Coin coin, Marker marker) {
+        DatabaseWork dw = new DatabaseWork();
+        walletCount = dw.getWalletCount();
+        dw.incrementWalletCount(walletCount);
+        Map<String, Object> coinInfo = new HashMap<>();
+        coinInfo.put("Value", coin.getValue());
+        coinInfo.put("Currency", coin.getCurrency());
+        coinInfo.put("ID", coin.getId());
+        db.collection("App").document("User")
+                .collection(mFirebaseUser.getUid()).document("Wallet").collection("Collected").document(walletCount.toString())
+                .set(coinInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "onSuccess: Coin successfully added to wallet");
+                Toast.makeText(getApplicationContext(), "Coin added to wallet", Toast.LENGTH_LONG).show();
+                map.removeMarker(marker);
+            }
+        });
     }
 
 
 
-
+    @Override
+    public boolean onMarkerClick(@NonNull Marker marker) {
+        Log.d(TAG, "onMarkerClick: Marker has been clicked.");
+        collectCoin(originLocation, marker);
+        return true;
+    }
 }
