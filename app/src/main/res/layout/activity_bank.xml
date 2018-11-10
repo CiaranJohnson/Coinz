@@ -8,41 +8,61 @@
     android:background="@color/btnSingUp"
     tools:context=".BankActivity">
 
-    <LinearLayout
-        android:layout_width="300dp"
-        android:layout_height="200dp"
-        android:background="@color/overlayBackground"
-        android:layout_centerInParent="true"
-        android:weightSum="3">
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="175dp"
-            android:layout_weight="1"
-            android:background="@color/white"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="5dp">
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/recycler_view">
+    </android.support.v7.widget.RecyclerView>
 
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="175dp"
-            android:layout_weight="1"
-            android:background="@color/white"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="5dp">
 
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="175dp"
-            android:layout_weight="1"
-            android:background="@color/white"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp">
+    <!--<LinearLayout-->
+        <!--android:layout_width="300dp"-->
+        <!--android:layout_height="200dp"-->
+        <!--android:background="@color/overlayBackground"-->
+        <!--android:layout_centerInParent="true"-->
+        <!--android:weightSum="3">-->
+        <!--<LinearLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="175dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:background="@color/white"-->
+            <!--android:layout_gravity="center_vertical"-->
+            <!--android:layout_marginLeft="5dp">-->
 
-        </LinearLayout>
+        <!--</LinearLayout>-->
+        <!--<LinearLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="175dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:background="@color/white"-->
+            <!--android:layout_gravity="center_vertical"-->
+            <!--android:layout_marginLeft="5dp">-->
 
-    </LinearLayout>
+        <!--</LinearLayout>-->
+        <!--<LinearLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="175dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:background="@color/white"-->
+            <!--android:layout_gravity="center_vertical"-->
+            <!--android:layout_marginLeft="5dp"-->
+            <!--android:layout_marginRight="5dp">-->
+
+        <!--</LinearLayout>-->
+
+    <!--</LinearLayout>-->
+
+    <!--<LinearLayout-->
+        <!--android:layout_width="300dp"-->
+        <!--android:layout_height="50dp"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_marginBottom="50dp"-->
+        <!--android:background="@color/white">-->
+        <!--<Button-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:text="@string/Bank"/>-->
+    <!--</LinearLayout>-->
 
 </RelativeLayout>

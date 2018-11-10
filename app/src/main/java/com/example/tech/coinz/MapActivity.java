@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
+import android.provider.DocumentsContract;
 import android.support.annotation.IntegerRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.JsonObject;
 import com.mapbox.geojson.Feature;
@@ -80,7 +82,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private static final String URL_DATA = "http://homepages.inf.ed.ac.uk/stg/coinz/2019/12/31/coinzmap.geojson";
     private ArrayList<Coin> coinList;
-    private Integer walletCount;
 
 
     // variables for adding location layer
@@ -96,6 +97,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
 
     private ArrayList<Marker> markers;
+    private ArrayList<String> collectedCoins;
 
 
 
@@ -122,6 +124,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             return;
         }
 
+        collectedCoins = new ArrayList<>();
         coinList = new ArrayList<Coin>();
         markers = new ArrayList<>();
         SettingsBtn = (Button) findViewById(R.id.SettingsBtn);
@@ -145,6 +148,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapActivity.this, BankActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -203,21 +207,62 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             map.setOnMarkerClickListener(this);
             enableLocationPlugin();
 
-            if(coinList != null){
-                Log.d(TAG, "onMapReady: coinlist not null" + coinList.get(0).getCurrency());
-                for (Coin coin: coinList){
-                    Log.d(TAG, "onMapReady: " + coin.getLatLng().toString());
+            getCollectedCoins();
 
-                    //THIS IS WEIRD TRY AND FIND OUT WHY IT GETS THE LAT AND LONG THE WROND WAY ROUND.
-                    LatLng coinPosition = new LatLng(coin.getLatLng().getLongitude(), coin.getLatLng().getLatitude(), 0.0);
-                    markers.add(map.addMarker(new MarkerOptions().setPosition(coinPosition).setTitle(coin.getCurrency())));
-                }
-            }
+//            if(coinList != null){
+//                Log.d(TAG, "onMapReady: coinlist not null" + coinList.get(0).getCurrency());
+//                for (Coin coin: coinList){
+//                    Log.d(TAG, "onMapReady: " + coin.getLatLng().toString());
+//                    Log.d(TAG, "onMapReady: " + collectedCoins.size());
+//                    if(!collectedCoins.contains(coin.getId())){
+//
+//                        //THIS IS WEIRD TRY AND FIND OUT WHY IT GETS THE LAT AND LONG THE WROND WAY ROUND.
+//                        LatLng coinPosition = new LatLng(coin.getLatLng().getLongitude(), coin.getLatLng().getLatitude(), 0.0);
+//                        markers.add(map.addMarker(new MarkerOptions().setPosition(coinPosition).setTitle(coin.getCurrency())));
+//                    } else {
+//                        Log.d(TAG, "onMapReady: coin not added");
+//                    }
+//                }
+//            }
         }
 
     }
 
+    public void getCollectedCoins() {
+        db.collection("App").document("User").collection(mFirebaseUser.getUid()).document("Wallet")
+                .collection("Collected").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
+                for (DocumentSnapshot doc: docs){
+                    Object coinId = doc.get("ID");
+                    Log.d(TAG, "getCollectedCoins: " + coinId.toString());
+                    collectedCoins.add(coinId.toString());
 
+
+                }
+                addMarkersToMap();
+            }
+        });
+    }
+
+    private void addMarkersToMap(){
+        if(coinList != null){
+            Log.d(TAG, "addMarkersToMap: coinlist not null" + coinList.get(0).getCurrency());
+            for (Coin coin: coinList){
+                Log.d(TAG, "addMarkersToMap: " + coin.getLatLng().toString());
+                Log.d(TAG, "addMarkersToMap: " + collectedCoins.size());
+                if(!collectedCoins.contains(coin.getId())){
+
+                    //THIS IS WEIRD TRY AND FIND OUT WHY IT GETS THE LAT AND LONG THE WROND WAY ROUND.
+                    LatLng coinPosition = new LatLng(coin.getLatLng().getLongitude(), coin.getLatLng().getLatitude(), 0.0);
+                    markers.add(map.addMarker(new MarkerOptions().setPosition(coinPosition).setTitle(coin.getCurrency())));
+                } else {
+                    Log.d(TAG, "addMarkersToMap: coin not added" + coin.getId());
+                }
+            }
+        }
+    }
 
     @SuppressWarnings( {"MissingPermission"})
     private void enableLocationPlugin() {
@@ -366,28 +411,52 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         LatLng userLatLng = new LatLng(latitude, longitude);
 
 
-        if(marker.getPosition().distanceTo(userLatLng)<10){
-            Toast.makeText(getApplicationContext(), "Coin collected" + marker, Toast.LENGTH_LONG).show();
+        if(marker.getPosition().distanceTo(userLatLng)<20){
 
             for (int i = 0; i<markers.size(); i++){
                 if (marker.getId() == markers.get(i).getId()){
                     Coin coin = coinList.get(i);
-                    addCoinToWallet(coin, marker);
+                    getWalletCount(coin, marker);
                 }
             }
         }
     }
 
-    private void addCoinToWallet(Coin coin, Marker marker) {
+    private void getWalletCount(Coin coin, Marker marker){
+        db.collection("App").document("User").collection(mFirebaseUser.getUid()).document("User Info").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()){
+                    Log.d(TAG, "onComplete: Got the Wallet Count successfully from firestore");
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    Object object = documentSnapshot.get("WalletCount");
+                    Log.d(TAG, "onComplete: " + object.toString());
+//                    Integer walletCount = Integer.getInteger(object.toString());
+                    addCoinToWallet(coin, marker, object.toString());
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: " + e);
+
+            }
+        });
+    }
+
+    private void addCoinToWallet(Coin coin, Marker marker, String walletCount) {
+        Log.d(TAG, "addCoinToWallet: " + walletCount);
         DatabaseWork dw = new DatabaseWork();
-        walletCount = dw.getWalletCount();
-        dw.incrementWalletCount(walletCount);
+        Integer count = Integer.parseInt(walletCount);
+        Log.d(TAG, "addCoinToWallet: " + count);
+        dw.incrementWalletCount(count);
         Map<String, Object> coinInfo = new HashMap<>();
         coinInfo.put("Value", coin.getValue());
         coinInfo.put("Currency", coin.getCurrency());
         coinInfo.put("ID", coin.getId());
         db.collection("App").document("User")
-                .collection(mFirebaseUser.getUid()).document("Wallet").collection("Collected").document(walletCount.toString())
+                .collection(mFirebaseUser.getUid()).document("Wallet").collection("Collected").document(count.toString())
                 .set(coinInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
