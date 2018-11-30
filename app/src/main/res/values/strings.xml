@@ -11,9 +11,22 @@
     <string name="Email_Address">Email Address</string>
     <string name="Back">Back</string>
     <string name="Name">Name</string>
+    <string name="Map">Map</string>
+    <string name="Send">Send</string>
+    <string name="search_hint">Search...</string>
+    <string name="Friends">Friends</string>
+    <string name="friend_requests">Friend Requests</string>
+    <string name="add">Add</string>
+    <string name="sent">Sent</string>
+    <string name="change">Change</string>
+    <string name="received">Received</string>
+    <string name="collected">Collected</string>
+    <string name="balance">Balance: </string>
 
 
     <string name="access_token" translatable="false">pk.eyJ1IjoiY2lhcmFuam9obnNvbiIsImEiOiJjam40aGYzbXgzajk5M3FvODBqZDJpc3c1In0.TzJCJOiNkogBl3JnHnh7Ew</string>
     <string name="user_location_permission_explanation">This app needs location permissions in order to show its functionality.</string>
     <string name="user_location_permission_not_granted">You didn\'t grant location permissions.</string>
+    <string name="title_activity_send_coins">SendCoinsActivity</string>
+    <string name="title_activity_game">GameActivity</string>
 </resources>

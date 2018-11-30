@@ -16,7 +16,7 @@
             android:layout_height="wrap_content">
 
             <com.rengwuxian.materialedittext.MaterialEditText
-                android:id="@+id/edtEmail"
+                android:id="@+id/editEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/Email_Address"
@@ -31,7 +31,7 @@
                 app:met_singleLineEllipsis="true" />
 
             <com.rengwuxian.materialedittext.MaterialEditText
-                android:id="@+id/edtPassword"
+                android:id="@+id/editPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/Password"

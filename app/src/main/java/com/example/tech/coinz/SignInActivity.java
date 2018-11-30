@@ -39,12 +39,12 @@ public class SignInActivity extends AppCompatActivity {
         signInBtn = (Button) findViewById(R.id.signInButton);
         backBtn = (Button) findViewById(R.id.backButton);
 
-        metEmail = (MaterialEditText) findViewById(R.id.medtEmail);
-        metPassword = (MaterialEditText) findViewById(R.id.medtPassword);
+        metEmail = (MaterialEditText) findViewById(R.id.editEmail);
+        metPassword = (MaterialEditText) findViewById(R.id.editPassword);
 
         mAuth = FirebaseAuth.getInstance();
 
-        backBtn.setOnClickListener(new View.OnClickListener() {
+        signInBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mAuth.signInWithEmailAndPassword(metEmail.getText().toString(), metPassword.getText().toString()).addOnCompleteListener(SignInActivity.this, new OnCompleteListener<AuthResult>() {
@@ -52,6 +52,7 @@ public class SignInActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
                             Log.d(TAG, "Sign In: successful");
+                            Toast.makeText(SignInActivity.this, "Authentication Successful", Toast.LENGTH_LONG).show();
                             FirebaseUser user = mAuth.getCurrentUser();
                             updateUI(user);
                         } else{
@@ -60,6 +61,14 @@ public class SignInActivity extends AppCompatActivity {
                         }
                     }
                 });
+            }
+        });
+
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+                startActivity(intent);
             }
         });
     }

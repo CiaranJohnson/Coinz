@@ -20,6 +20,9 @@ public class DatabaseWork {
     private static final String TAG = "DatabaseWork";
 
 
+    //THIS CLASS IS REDUNDANT I THINK!!!!
+
+
     public Integer getWalletCount(){
         db.collection("App").document("User").collection(user.getUid()).document("User Info").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
 

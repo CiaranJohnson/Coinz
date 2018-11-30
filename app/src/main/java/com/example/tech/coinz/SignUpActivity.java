@@ -19,9 +19,13 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.auth.User;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -120,26 +124,29 @@ public class SignUpActivity extends AppCompatActivity {
                     Log.d(TAG, "name of user is " + displayName);
 
 
+                    userInfo.put("UID", user.getUid());
+                    userInfo.put("Email", user.getEmail());
                     userInfo.put("DisplayName", displayName);
-                    userInfo.put("Bank", 0);
-                    userInfo.put("WalletCount", 0);
+
+                    //Adds users info to the database aand if successful closes SignUp and starts MapActivity
+                    Backend.addUserInfo(userInfo, user.getUid(), getApplicationContext(), TAG);
+                    Backend.changeBankBalance(0, getApplicationContext(), TAG);
+                    Backend.changeCoinsSubmitted(0, getApplicationContext(), TAG);
+
+                    UserInfo.userDisplayName = displayName;
+                    UserInfo.userEmail = user.getEmail();
+                    UserInfo.userUid = user.getUid();
 
 
+                    String date = "0000/00/00";
+                    Map<String, Object> dateMap = new HashMap<>();
+                    dateMap.put("LastUpdated", date);
+                    db.collection("User").document(user.getUid()).collection("Date").document("LastUsed").set(dateMap);
 
-                    db.collection("App").document("User").collection(user.getUid()).document("User Info").set(userInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Log.d(TAG, "onSuccess: Successfully added user info to firestore db");
-                            Intent intent = new Intent(SignUpActivity.this, MapActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "onFailure: " + e.getMessage() );
-                        }
-                    });
+
+                    Intent intent = new Intent(SignUpActivity.this, MapActivity.class);
+                    startActivity(intent);
+                    finish();
 
 
                 } else {
@@ -149,4 +156,6 @@ public class SignUpActivity extends AppCompatActivity {
         };
 
     }
+
+
 }

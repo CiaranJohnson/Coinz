@@ -59,12 +59,12 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Coins"
+                        android:text="@string/collected"
                         android:textSize="20sp"
                         />
 
                     <TextView
-                        android:id="@+id/txtCoins"
+                        android:id="@+id/txtCoin"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingTop="10dp"
@@ -84,7 +84,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Requests"
+                        android:text="@string/received"
                         android:textSize="20sp" />
 
                     <TextView
@@ -108,11 +108,11 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/Bank"
+                        android:text="@string/change"
                         android:textSize="20sp" />
 
                     <TextView
-                        android:id="@+id/txtHelped"
+                        android:id="@+id/txtBank"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingTop="10dp"
@@ -125,15 +125,67 @@
         </android.support.v7.widget.CardView>
     </RelativeLayout>
 
-    <Button
-        android:id="@+id/mapButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
+    <LinearLayout
         android:layout_marginTop="20dp"
-        android:background="@drawable/buttonstyleithgradient"
-        android:text="Map"
-        android:textColor="#fff" />
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="2"
+        android:orientation="horizontal">
+        <ImageButton
+            android:id="@+id/walletButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/coin_in_black_24dp"
+            android:background="@drawable/buttonstyleithgradient"
+            android:layout_weight="1"
+            android:layout_marginRight="10dp"
+            />
+        <ImageButton
+            android:layout_marginRight="10dp"
+            android:id="@+id/mapButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/buttonstyleithgradient"
+            android:src="@drawable/map_black_24dp"
+            android:layout_weight="1"
+            android:text="Map"
+            android:textColor="#fff" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="2"
+        android:orientation="horizontal">
+        <ImageButton
+            android:id="@+id/friendsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_person_add_black_24dp"
+            android:background="@drawable/buttonstyleithgradient"
+            android:layout_weight="1"
+            android:layout_marginRight="10dp"
+            />
+        <ImageButton
+            android:id="@+id/gameBtn"
+            android:layout_marginRight="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/buttonstyleithgradient"
+            android:layout_weight="1"
+            android:src="@drawable/ic_videogame_asset_black_24dp"
+            android:textColor="#fff" />
+
+    </LinearLayout>
+
+
+
 
 </LinearLayout>
 
