@@ -21,8 +21,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -177,22 +179,20 @@ public class SelectUserActivity extends AppCompatActivity {
     }
 
     private void firebaseSearch(String searchText){
-        db.collection("User").whereEqualTo("Email", searchText).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        db.collection("User").whereEqualTo("Email", searchText).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                Map<String, Object> userInformation = queryDocumentSnapshots.getDocuments().get(0).getData();
-                if (queryDocumentSnapshots.getDocuments().size() == 0){
-                    Toast.makeText(SelectUserActivity.this,"Sorry this User does not exist. Try again.", Toast.LENGTH_LONG).show();
-                } else {
-                    checkDatabase(userInformation);
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if(task.isSuccessful()){
+                    if (task.getResult().getDocuments().size() == 0) {
+                        Toast.makeText(SelectUserActivity.this, "Sorry this User does not exist. Try again.", Toast.LENGTH_LONG).show();
+                    } else {
+                        Map<String, Object> userInformation = task.getResult().getDocuments().get(0).getData();
+                        checkDatabase(userInformation);
+                    }
                 }
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, "firebaseSearch: " + e.getMessage());
-            }
         });
+
     }
 
     private void checkDatabase(Map<String, Object> userInfo){
@@ -200,7 +200,17 @@ public class SelectUserActivity extends AppCompatActivity {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 if(queryDocumentSnapshots.getDocuments().size() == 0){
-                    viewUserInformation(userInfo, false);
+                    mCurrentUserRef.collection("Friends").whereEqualTo("UID", userInfo.get("UID")).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            if(queryDocumentSnapshots.getDocuments().size() == 0){
+                                viewUserInformation(userInfo, false);
+                            } else {
+                                viewUserInformation(userInfo, true);
+                            }
+                        }
+                    });
+
                 } else {
                     viewUserInformation(userInfo, true);
                 }

@@ -262,13 +262,16 @@ public class Backend {
         });
     }
 
-    public static void pickUpCoin(String coinID, String TAG){
+    public static void pickUpCoin(String coinID, String TAG, Context mContext){
         mCurrentUserRef.collection("Map").document(coinID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Map<String, Object> coinInfo = documentSnapshot.getData();
-                documentSnapshot.getReference().delete();
-                addToCollectedCoins(coinInfo, TAG);
+                if(!(documentSnapshot.getData() == null)) {
+                    Toast.makeText(mContext, "Coin Picked Up", Toast.LENGTH_LONG).show();
+                    Map<String, Object> coinInfo = documentSnapshot.getData();
+                    documentSnapshot.getReference().delete();
+                    addToCollectedCoins(coinInfo, TAG);
+                }
             }
         });
     }

@@ -62,7 +62,6 @@ import android.support.annotation.NonNull;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
-import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
@@ -97,7 +96,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private MapView mapView;
     private MapboxMap map;
-    public Button SettingsBtn, ProfileBtn, BankBtn;
+    public Button GamesBtn, ProfileBtn, BankBtn;
 
     private static final String URL_DATA = "http://homepages.inf.ed.ac.uk/stg/coinz/2019/12/31/coinzmap.geojson";
     private ArrayList<Coin> coinList;
@@ -127,7 +126,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         Mapbox.getInstance(MapActivity.this, getString(R.string.access_token));
         setContentView(R.layout.activity_map);
 
@@ -151,7 +150,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         collectedCoins = new ArrayList<>();
         coinList = new ArrayList<Coin>();
         markers = new ArrayList<>();
-        SettingsBtn = (Button) findViewById(R.id.SettingsBtn);
+        GamesBtn = (Button) findViewById(R.id.GamesBtn);
         BankBtn = (Button) findViewById(R.id.BankBtn);
         ProfileBtn = (Button) findViewById(R.id.ProfileBtn);
         mCurrentUserRef = db.collection("User").document(mFirebaseUser.getUid());
@@ -181,10 +180,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
 
-        SettingsBtn.setOnClickListener(new View.OnClickListener() {
+        GamesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MapActivity.this, SettingsActivity.class);
+                Intent intent = new Intent(MapActivity.this, BonusFeatureActivity.class);
                 startActivity(intent);
             }
         });
@@ -310,9 +309,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
             this.map = mapboxMap;
             map.getUiSettings().setCompassEnabled(true);
-            map.getUiSettings().setZoomControlsEnabled(true);
+//            map.getUiSettings().setZoomControlsEnabled(true);
             map.setOnMarkerClickListener(this);
             enableLocationPlugin();
+
 
             if(markers!= null){
                 addMarkersToMap();
@@ -395,12 +395,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private void initializeLocationEngine() {
         LocationEngineProvider locationEngineProvider = new LocationEngineProvider(this);
         locationEngine = locationEngineProvider.obtainBestLocationEngineAvailable();
+        locationEngine.setInterval(5000); // preferably every 5 seconds
+        locationEngine.setFastestInterval(1000); // at most every second
         locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
         locationEngine.activate();
 
         Location lastLocation = locationEngine.getLastLocation();
         if (lastLocation != null) {
             originLocation = lastLocation;
+            Log.d(TAG, "initializeLocationEngine: last known location " + originLocation.toString());
         } else {
             locationEngine.addLocationEngineListener(this);
         }
@@ -494,12 +497,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
 
     @Override
+    @SuppressWarnings("MissingPermission")
     public void onConnected() {
+        Log.d(TAG,"[onConnected] requesting location updates");
+        locationEngine.requestLocationUpdates();
 
     }
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.d(TAG, "onLocationChanged: ");
         if (location == null){
             Log.d(TAG, "onLocationChanged: Location is null");
         } else {
@@ -515,21 +522,24 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         Double latitude = location.getLatitude();
         Double longitude = location.getLongitude();
         LatLng userLatLng = new LatLng(latitude, longitude);
-
-
-        if(marker.getPosition().distanceTo(userLatLng)<100){
-            Backend.pickUpCoin(marker.getTitle(), TAG);
+        Log.d(TAG, "collectCoin: " + marker.getPosition().distanceTo(userLatLng));
+        if(marker.getPosition().distanceTo(userLatLng)<25){
+            Log.d(TAG, "collectCoin: " + marker.getTitle());
             map.removeMarker(marker);
+            Backend.pickUpCoin(marker.getTitle(), TAG, getApplicationContext());
+
         }
     }
 
 
 
     @Override
+    @SuppressWarnings("MissingPermission")
     public boolean onMarkerClick(@NonNull Marker marker) {
         Log.d(TAG, "onMarkerClick: Marker has been clicked.");
-        collectCoin(originLocation, marker);
-        return true;
+        Location lastLocation = locationEngine.getLastLocation();
+        collectCoin(lastLocation, marker);
+          return true;
     }
 
 

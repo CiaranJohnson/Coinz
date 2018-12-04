@@ -97,8 +97,13 @@ public class BankActivity extends AppCompatActivity {
                 Map<String, Object> balanceData = documentSnapshot.getData();
                 String balance = balanceData.get("BankBalance").toString();
                 int index = balance.indexOf('.');
-                balanceTxt.setText(balance.substring(0, index + 3));
-                Log.d(TAG, "onSuccess: " + balance);
+                if(index == -1){
+                    balanceTxt.setText(balance);
+                } else {
+                    balanceTxt.setText(balance.substring(0, index + 3));
+                    Log.d(TAG, "onSuccess: " + balance);
+                }
+
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

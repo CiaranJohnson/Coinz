@@ -41,7 +41,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     //Declare User interface
     private ImageButton mapBtn, friendBtn, walletBtn, gameBtn;
-    TextView nameTxt, coinsTxt, bankTxt;
+    private Button signoutBtn;
+    TextView nameTxt, coinsTxt, bankTxt, receivedTxt;
     CircleImageView profilePic;
     Uri imageUri;
 
@@ -71,10 +72,12 @@ public class ProfileActivity extends AppCompatActivity {
         friendBtn = (ImageButton) findViewById(R.id.friendsButton);
         walletBtn = (ImageButton) findViewById(R.id.walletButton);
         gameBtn = (ImageButton) findViewById(R.id.gameBtn);
+        signoutBtn = (Button) findViewById(R.id.signOutBtn);
 
         coinsTxt = (TextView) findViewById(R.id.txtCoin);
         nameTxt = (TextView) findViewById(R.id.addNameTxt);
         bankTxt = (TextView) findViewById(R.id.txtBank);
+        receivedTxt = (TextView) findViewById(R.id.txtNumReceived);
 
         profilePic = (CircleImageView) findViewById(R.id.profilePicture);
 
@@ -110,7 +113,7 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        mCurrentUserRef.collection("Friends").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        mCurrentUserRef.collection("CollectedCoins").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 Log.d(TAG, "onComplete: Got the friend count successfully from firestore " + queryDocumentSnapshots.getDocuments().size());
@@ -121,6 +124,13 @@ public class ProfileActivity extends AppCompatActivity {
             public void onFailure(@NonNull Exception e) {
                 Log.d(TAG, "onFailure: " + e);
                 coinsTxt.setText("-");
+            }
+        });
+
+        mCurrentUserRef.collection("ReceivedCoins").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                receivedTxt.setText(String.valueOf(queryDocumentSnapshots.getDocuments().size()));
             }
         });
 
@@ -154,6 +164,15 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ProfileActivity.this, GameActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        signoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                firebaseAuth.signOut();
+                Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
                 startActivity(intent);
             }
         });

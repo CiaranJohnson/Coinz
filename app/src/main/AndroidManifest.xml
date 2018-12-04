@@ -24,7 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SettingsActivity" />
         <activity android:name=".BankActivity" />
         <activity android:name=".ProfileActivity" />
         <activity
@@ -34,9 +33,13 @@
         <activity android:name=".AddFriendsActivity" />
         <activity android:name=".SelectUserActivity" />
         <activity
+            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
+        <activity
             android:name=".GameActivity"
             android:label="@string/title_activity_game"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".BonusFeatureActivity"></activity>
     </application>
 
 </manifest>

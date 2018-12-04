@@ -9,7 +9,14 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class GameActivity extends AppCompatActivity {
@@ -18,6 +25,8 @@ public class GameActivity extends AppCompatActivity {
     ArrayList<String> prizes = new ArrayList<>();
 
     ImageButton card1, card2, card3, card4, card5, card6, card7, card8, card9;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +76,7 @@ public class GameActivity extends AppCompatActivity {
             position.remove(result);
             j--;
         }
+
 
 
         card1.setOnClickListener(new View.OnClickListener() {
@@ -151,17 +161,24 @@ public class GameActivity extends AppCompatActivity {
 
         if (reward.equals("DOLR")) {
             imageButton.setImageResource(R.mipmap.ic_dollar_foreground);
+            Toast.makeText(GameActivity.this, "Dollar Coins Added to Bank!", Toast.LENGTH_LONG).show();
         } else if (reward.equals("PENY")) {
             imageButton.setImageResource(R.mipmap.ic_peny_foreground);
+            Toast.makeText(GameActivity.this, "Penny Coins Added to Bank!", Toast.LENGTH_LONG).show();
         } else if(reward.equals("QUID")){
             imageButton.setImageResource(R.mipmap.ic_quid_foreground);
+            Toast.makeText(GameActivity.this, "Quid Coins Added to Bank!", Toast.LENGTH_LONG).show();
         } else if (reward.equals("SHIL")){
             imageButton.setImageResource(R.mipmap.ic_shilling_foreground);
+            Toast.makeText(GameActivity.this, "Shilling Coins Added to Bank!", Toast.LENGTH_LONG).show();
         } else if(reward.equals("AllCoins")){
             imageButton.setImageResource(R.mipmap.ic_all_coins_foreground);
+            Toast.makeText(GameActivity.this, "All Coins Added to Bank!", Toast.LENGTH_LONG).show();
         } else {
             imageButton.setImageResource(R.mipmap.ic_no_coins_foreground);
+            Toast.makeText(GameActivity.this, "No Coins Added to Bank...", Toast.LENGTH_LONG).show();
         }
     }
+
 
 }
