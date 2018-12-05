@@ -1,61 +1,35 @@
 package com.example.tech.coinz;
 
-import android.app.LauncherActivity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.net.Uri;
-import android.provider.DocumentsContract;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.IntegerRes;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.android.gms.tasks.OnCompleteListener;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.JsonObject;
-import com.google.protobuf.DurationOrBuilder;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.geojson.Geometry;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
-import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import android.location.Location;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import android.support.annotation.NonNull;
@@ -69,18 +43,14 @@ import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.json.JSONException;
+
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -88,7 +58,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import com.mapbox.mapboxsdk.annotations.Icon;
 
-import javax.annotation.Nullable;
+
+import timber.log.Timber;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener, PermissionsListener, MapboxMap.OnMarkerClickListener {
 
@@ -99,7 +70,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public Button GamesBtn, ProfileBtn, BankBtn;
 
     private static final String URL_DATA = "http://homepages.inf.ed.ac.uk/stg/coinz/2019/12/31/coinzmap.geojson";
-    private ArrayList<Coin> coinList;
 
 
     // variables for adding location layer
@@ -107,7 +77,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private PermissionsManager permissionsManager;
     private LocationLayerPlugin locationLayerPlugin;
     private LocationEngine locationEngine;
-    private Location originLocation;
+    Location originLocation;
 
     public FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
@@ -116,7 +86,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
 
     private ArrayList<Marker> markers;
-    private ArrayList<String> collectedCoins;
 
     private String date;
 
@@ -126,6 +95,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Timber.plant(new Timber.DebugTree());
 
         Mapbox.getInstance(MapActivity.this, getString(R.string.access_token));
         setContentView(R.layout.activity_map);
@@ -139,7 +110,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
         db = FirebaseFirestore.getInstance();
         if(mFirebaseUser == null) {
-            Log.d(TAG, "onCreate: no user");
+            Timber.d( "onCreate: no user");
             mapView.onDestroy();
             Intent intent = new Intent(MapActivity.this, MainActivity.class);
             startActivity(intent);
@@ -147,8 +118,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             return;
         }
 
-        collectedCoins = new ArrayList<>();
-        coinList = new ArrayList<Coin>();
+
         markers = new ArrayList<>();
         GamesBtn = (Button) findViewById(R.id.GamesBtn);
         BankBtn = (Button) findViewById(R.id.BankBtn);
@@ -156,28 +126,27 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mCurrentUserRef = db.collection("User").document(mFirebaseUser.getUid());
 
         String date = getDate();
-        Log.d(TAG, "onCreate: the current date is:" + date);
+        Timber.d( "onCreate: the current date is:" + date);
 
         db.collection("User").document(mFirebaseUser.getUid()).collection("Date")
                 .document("LastUsed").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 Map<String, Object> dateInfo = documentSnapshot.getData();
-                if(!date.equals(dateInfo.get("LastUpdated"))){
-                    Log.d(TAG, "onSuccess: " + date);
-                    newDay(date);
+                if(dateInfo!= null){
+                    if(!date.equals(dateInfo.get("LastUpdated"))){
+                        Timber.d( "onSuccess: " + date);
+                        newDay(date);
+                    }
                 }
             }
         });
 
 
 
-        BankBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MapActivity.this, BankActivity.class);
-                startActivity(intent);
-            }
+        BankBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(MapActivity.this, BankActivity.class);
+            startActivity(intent);
         });
 
         GamesBtn.setOnClickListener(new View.OnClickListener() {
@@ -210,9 +179,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         String json = null;
         try {
             json = downloadTaskFile.execute("http://homepages.inf.ed.ac.uk/stg/coinz/" + date + "/coinzmap.geojson").get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
         Log.d(TAG, "newDay: " + json);
@@ -235,12 +202,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 Log.d(TAG, "deleteOldMap: Successfully retrieved the old map");
-                if(queryDocumentSnapshots.getDocuments() != null) {
+                if(queryDocumentSnapshots.getDocuments().size() > 0) {
                     for (DocumentSnapshot doc:queryDocumentSnapshots.getDocuments()){
                         doc.getReference().delete();
                     }
                 }
-                getNewMap(json, TAG);
+                getNewMap(json);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -251,48 +218,54 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
 
-    private void getNewMap(String json, String TAG){
+    private void getNewMap(String json){
         FeatureCollection fc = FeatureCollection.fromJson(json);
         List<Feature> features = (List<Feature>) fc.features();
         int counter = 0;
 
-        for (Feature feature: features){
-            Point point = (Point) feature.geometry();
-            List<Double> latlng = point.coordinates();
-            JsonObject properties = feature.properties();
-            String id = properties.get("id").getAsString();
-            String value = properties.get("value").getAsString();
-            String currency = properties.get("currency").getAsString();
-            String markerSymbol = properties.get("marker-symbol").getAsString();
-            String markerColor = properties.get("marker-color").getAsString();
+        if (features != null){
+            for (Feature feature: features) {
+                Point point = (Point) feature.geometry();
+                List<Double> latlng = point.coordinates();
+                JsonObject properties = feature.properties();
 
-            Map<String, Object> coin = new HashMap<>();
-            coin.put("ID", id);
-            coin.put("Value", value);
-            coin.put("Currency", currency);
-            coin.put("MarkerSymbol", markerSymbol);
-            coin.put("MarkerColor",markerColor);
-            coin.put("Longitude", latlng.get(0));
-            coin.put("Latitude", latlng.get(1));
-            counter++;
-            int count = counter;
-            mCurrentUserRef.collection("Map").document(id).set(coin).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    Log.d(TAG, "onSuccess: Successfully added coin: " + id);
+                String id = properties.get("id").getAsString();
+                String value = properties.get("value").getAsString();
+                String currency = properties.get("currency").getAsString();
+                String markerSymbol = properties.get("marker-symbol").getAsString();
+                String markerColor = properties.get("marker-color").getAsString();
+
+
+                Map<String, Object> coin = new HashMap<>();
+                coin.put("ID", id);
+                coin.put("Value", value);
+                coin.put("Currency", currency);
+                coin.put("MarkerSymbol", markerSymbol);
+                coin.put("MarkerColor", markerColor);
+                coin.put("Longitude", latlng.get(0));
+                coin.put("Latitude", latlng.get(1));
+                counter++;
+                int count = counter;
+                mCurrentUserRef.collection("Map").document(id).set(coin).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "onSuccess: Successfully added coin: " + id);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "onFailure: Failed to add coin: " + id + " due to " + e.getMessage());
+                    }
+                });
+                Log.d(TAG, "getNewMap: " + features.size());
+                Log.d(TAG, "getNewMap: " + counter);
+                if (counter == features.size()) {
+                    addMarkersToMap();
                 }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.e(TAG, "onFailure: Failed to add coin: " + id + " due to "+ e.getMessage());
-                }
-            });
+            }
+
         }
-        Log.d(TAG, "getNewMap: " + features.size());
-        Log.d(TAG, "getNewMap: " + counter);
-        if(counter == features.size()){
-            addMarkersToMap();
-        }
+
 
 
     }
@@ -309,7 +282,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
             this.map = mapboxMap;
             map.getUiSettings().setCompassEnabled(true);
-//            map.getUiSettings().setZoomControlsEnabled(true);
             map.setOnMarkerClickListener(this);
             enableLocationPlugin();
 
@@ -538,8 +510,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public boolean onMarkerClick(@NonNull Marker marker) {
         Log.d(TAG, "onMarkerClick: Marker has been clicked.");
         Location lastLocation = locationEngine.getLastLocation();
-        collectCoin(lastLocation, marker);
-          return true;
+        Double longitude = lastLocation.getLongitude();
+        Double latitude = lastLocation.getLatitude();
+        LatLng userLatLng = new LatLng(latitude, longitude);
+        Toast.makeText(this, "You are " + Math.ceil(marker.getPosition().distanceTo(userLatLng)) + " metres from this coin.", Toast.LENGTH_LONG).show();
+        return true;
     }
 
 

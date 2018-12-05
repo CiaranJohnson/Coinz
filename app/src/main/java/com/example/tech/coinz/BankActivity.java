@@ -23,22 +23,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+/**
+ * This class displays the current amount of gold in the bank aswell as all the coins that can be added to the bank.
+ *
+ * @author Ciaran
+ */
 
 public class BankActivity extends AppCompatActivity {
 
     private static final String TAG = "BankActivity";
 
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private FirebaseAuth firebaseAuth;
-    private FirebaseUser user;
+    FirebaseAuth firebaseAuth;
+    private static FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private static FirebaseUser user;
 
-    private Button mapBtn;
-    private TextView balanceTxt;
+    Button mapBtn;
+    private static TextView balanceTxt;
 
     Map<String, Object> collectedCoin;
     ArrayList<String> currency;
     ArrayList<String> value;
     ArrayList<String> id;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +67,8 @@ public class BankActivity extends AppCompatActivity {
 
         displayBankBalanced();
 
-        //Get the currency, value and id of all the coins currently stored in the collected part of wallet
+        //Get all the Coins in Collected Coins and store the id, value and Currency as these will be used in the recycler view
+
         db.collection("User").document(user.getUid()).collection("CollectedCoins").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -69,11 +78,12 @@ public class BankActivity extends AppCompatActivity {
 
                    Log.d(TAG, "onSuccess: " + collectedCoin.get("Currency").toString());
 
-                   currency.add(collectedCoin.get("Currency").toString());
-                   value.add(collectedCoin.get("Value").toString());
-                   id.add(collectedCoin.get("ID").toString());
+                   currency.add(Objects.requireNonNull(collectedCoin.get("Currency").toString()));
+                   value.add(Objects.requireNonNull(collectedCoin.get("Value")).toString());
+                   id.add(Objects.requireNonNull(collectedCoin.get("ID").toString()));
 
                }
+
                initRecyclerView();
             }
         });
@@ -90,18 +100,23 @@ public class BankActivity extends AppCompatActivity {
 
     }
 
-    public void displayBankBalanced(){
+    /**
+     * Gets the users BankBalance from Firebase and Displays this value to 2 significant figure
+     */
+    public static void displayBankBalanced(){
         db.collection("User").document(user.getUid()).collection("Bank").document("Total").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 Map<String, Object> balanceData = documentSnapshot.getData();
-                String balance = balanceData.get("BankBalance").toString();
-                int index = balance.indexOf('.');
-                if(index == -1){
-                    balanceTxt.setText(balance);
-                } else {
-                    balanceTxt.setText(balance.substring(0, index + 3));
-                    Log.d(TAG, "onSuccess: " + balance);
+                if(balanceData != null){
+                    String balance = Objects.requireNonNull(balanceData.get("BankBalance")).toString();
+                    int index = balance.indexOf('.');
+                    if(index == -1){
+                        balanceTxt.setText(balance);
+                    } else {
+                        balanceTxt.setText(balance.substring(0, index + 3));
+                        Log.d(TAG, "onSuccess: " + balance);
+                    }
                 }
 
             }
@@ -113,6 +128,9 @@ public class BankActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Initialises the recycler view with Coin Information about Coins collected that day
+     */
     private void initRecyclerView(){
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(currency, value, id, this);

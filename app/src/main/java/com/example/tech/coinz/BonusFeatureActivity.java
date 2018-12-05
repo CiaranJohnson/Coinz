@@ -18,6 +18,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 
 public class BonusFeatureActivity extends AppCompatActivity {
 
@@ -26,15 +27,15 @@ public class BonusFeatureActivity extends AppCompatActivity {
     private TextView usr_first, usr_second, usr_third, usr_fourth, usr_fifth;
     private TextView bank_first, bank_second, bank_third, bank_fourth, bank_fifth;
 
-    private FirebaseAuth mAuth;
-    private FirebaseUser user;
+    FirebaseAuth mAuth;
+    FirebaseUser user;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private DocumentReference mCurrentUserRef;
+    DocumentReference mCurrentUserRef;
 
     ArrayList<Double> bankBalances;
     ArrayList<String> userEmails;
 
-    private Button playBtn;
+    Button playBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,18 +96,20 @@ public class BonusFeatureActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             Map<String, Object> bank = documentSnapshot.getData();
-                            Double balance = Double.parseDouble(bank.get("BankBalance").toString());
-                            int i = 0;
-                            if(bankBalances.size()!=0){
-                                while(i<bankBalances.size() && bankBalances.get(i)<balance){
-                                    i++;
+                            if (bank != null) {
+                                Double balance = Double.parseDouble(Objects.requireNonNull(bank.get("BankBalance")).toString());
+                                int i = 0;
+                                if (bankBalances.size() != 0) {
+                                    while (i < bankBalances.size() && bankBalances.get(i) > balance) {
+                                        i++;
+                                    }
                                 }
-                            }
 
-                            bankBalances.add(i, balance);
-                            userEmails.add(i, userInfo.get("Email").toString());
-                            if(userEmails.size()==queryDocumentSnapshots.size()){
-                                displayTopFive();
+                                bankBalances.add(i, balance);
+                                userEmails.add(i, Objects.requireNonNull(userInfo.get("Email")).toString());
+                                if (userEmails.size() == queryDocumentSnapshots.size()) {
+                                    displayTopFive();
+                                }
                             }
                         }
                     });
@@ -120,24 +123,23 @@ public class BonusFeatureActivity extends AppCompatActivity {
         Log.d(TAG, "displayTopFive: started " +userEmails.size());
         int arr_length = userEmails.size();
         if (arr_length < 5) {
-            for (int i = 0; i < 5 - arr_length ; i++) {
-                userEmails.add(i, "Username");
+            for (int i = arr_length; i < 5; i++) {
+                userEmails.add(i, "User Email");
                 bankBalances.add(i, 0.0);
             }
-            arr_length = 5;
         }
         Log.d(TAG, "displayTopFive: new size "+ userEmails.size());
-        usr_first.setText(userEmails.get(arr_length - 1));
-        usr_second.setText(userEmails.get(arr_length - 2));
-        usr_third.setText(userEmails.get(arr_length - 3));
-        usr_fourth.setText(userEmails.get(arr_length - 4));
-        usr_fifth.setText(userEmails.get(arr_length - 5));
+        usr_first.setText(userEmails.get(0));
+        usr_second.setText(userEmails.get(1));
+        usr_third.setText(userEmails.get(2));
+        usr_fourth.setText(userEmails.get(3));
+        usr_fifth.setText(userEmails.get(4));
 
-        bank_first.setText(String.valueOf(bankBalances.get(arr_length - 1).intValue()));
-        bank_second.setText(String.valueOf(bankBalances.get(arr_length - 2).intValue()));
-        bank_third.setText(String.valueOf(bankBalances.get(arr_length - 3).intValue()));
-        bank_fourth.setText(String.valueOf(bankBalances.get(arr_length - 4).intValue()));
-        bank_fifth.setText(String.valueOf(bankBalances.get(arr_length - 5).intValue()));
+        bank_first.setText(String.valueOf(bankBalances.get(0).intValue()));
+        bank_second.setText(String.valueOf(bankBalances.get(1).intValue()));
+        bank_third.setText(String.valueOf(bankBalances.get(2).intValue()));
+        bank_fourth.setText(String.valueOf(bankBalances.get(3).intValue()));
+        bank_fifth.setText(String.valueOf(bankBalances.get(4).intValue()));
     }
 
 }

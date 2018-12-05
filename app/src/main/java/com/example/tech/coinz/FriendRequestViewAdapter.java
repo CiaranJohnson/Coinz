@@ -37,7 +37,7 @@ public class FriendRequestViewAdapter extends RecyclerView.Adapter<FriendRequest
     private ArrayList<String> userID = new ArrayList<>();
     private ArrayList<String> displayName = new ArrayList<>();
     private ArrayList<String> email = new ArrayList<>();
-    private Context mContext;
+    Context mContext;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseAuth firebaseAuth;

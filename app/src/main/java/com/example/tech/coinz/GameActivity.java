@@ -1,6 +1,7 @@
 package com.example.tech.coinz;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,7 @@ public class GameActivity extends AppCompatActivity {
 
     public static final String TAG = "GameActivity";
     ArrayList<String> prizes = new ArrayList<>();
+    String[] cardOrder;
 
     ImageButton card1, card2, card3, card4, card5, card6, card7, card8, card9;
 
@@ -56,7 +58,7 @@ public class GameActivity extends AppCompatActivity {
 
 
         ArrayList<Integer> position = new ArrayList<>();
-        int[] cardOrder = new int[9];
+        cardOrder = new String[9];
         position.add(0);
         position.add(1);
         position.add(2);
@@ -72,8 +74,8 @@ public class GameActivity extends AppCompatActivity {
 
         for (int i = 0; i<9; i++){
             int result = r.nextInt(j);
-            cardOrder[i] = position.get(result);
-            position.remove(result);
+            cardOrder[i] = prizes.get(result);
+            prizes.remove(result);
             j--;
         }
 
@@ -82,78 +84,76 @@ public class GameActivity extends AppCompatActivity {
         card1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String reward = prizes.get(cardOrder[0]);
-                GameBackend.getCoinsFromSpareChange(reward);
-                changeImageButton(card1, reward);
+
+                GameBackend.getCoinsFromSpareChange(cardOrder[0]);
+                changeImageButton(card1, cardOrder[0]);
             }
         });
         card2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String reward = prizes.get(cardOrder[1]);
-                GameBackend.getCoinsFromSpareChange(reward);
-                changeImageButton(card2, reward);
+
+                GameBackend.getCoinsFromSpareChange(cardOrder[1]);
+                changeImageButton(card2, cardOrder[1]);
             }
         });
         card3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                String reward = prizes.get(cardOrder[2]);
-                GameBackend.getCoinsFromSpareChange(reward);
-                changeImageButton(card3, reward);
+                GameBackend.getCoinsFromSpareChange(cardOrder[2]);
+                changeImageButton(card3, cardOrder[2]);
             }
         });
         card4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String reward = prizes.get(cardOrder[3]);
-                GameBackend.getCoinsFromSpareChange(reward);
-                changeImageButton(card4, reward);
+
+                GameBackend.getCoinsFromSpareChange(cardOrder[3]);
+                changeImageButton(card4, cardOrder[3]);
             }
         });
         card5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                String reward = prizes.get(cardOrder[4]);
-                GameBackend.getCoinsFromSpareChange(reward);
-                changeImageButton(card5, reward);
+                GameBackend.getCoinsFromSpareChange(cardOrder[4]);
+                changeImageButton(card5, cardOrder[4]);
             }
         });
         card6.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                String reward = prizes.get(cardOrder[5]);
-                GameBackend.getCoinsFromSpareChange(reward);
-                changeImageButton(card6, reward);
+                GameBackend.getCoinsFromSpareChange(cardOrder[5]);
+                changeImageButton(card6, cardOrder[5]);
             }
         });
         card7.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String reward = prizes.get(cardOrder[6]);
-                GameBackend.getCoinsFromSpareChange(reward);
-                changeImageButton(card7, reward);
+
+                GameBackend.getCoinsFromSpareChange(cardOrder[6]);
+                changeImageButton(card7, cardOrder[6]);
             }
         });
         card8.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String reward = prizes.get(cardOrder[7]);
-                GameBackend.getCoinsFromSpareChange(reward);
-                changeImageButton(card8, reward);
+
+                GameBackend.getCoinsFromSpareChange(cardOrder[7]);
+                changeImageButton(card8, cardOrder[7]);
             }
         });
         card9.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String reward = prizes.get(cardOrder[8]);
-                GameBackend.getCoinsFromSpareChange(reward);
-                changeImageButton(card9, reward);
+
+                GameBackend.getCoinsFromSpareChange(cardOrder[8]);
+                changeImageButton(card9, cardOrder[8]);
             }
         });
+
 
     }
 
@@ -177,6 +177,48 @@ public class GameActivity extends AppCompatActivity {
         } else {
             imageButton.setImageResource(R.mipmap.ic_no_coins_foreground);
             Toast.makeText(GameActivity.this, "No Coins Added to Bank...", Toast.LENGTH_LONG).show();
+        }
+
+        setCardsToUnclickable();
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                // Actions to do after 10 seconds
+                ImageButton[] buttons = {card1, card2, card3, card4, card5, card6, card7,card8, card9};
+                for (int i = 0; i<9;i++){
+                    flipTheRest(buttons[i], cardOrder[i]);
+                }
+            }
+        }, 3000);
+
+
+    }
+
+    private void setCardsToUnclickable(){
+        card9.setClickable(false);
+        card8.setClickable(false);
+        card7.setClickable(false);
+        card6.setClickable(false);
+        card5.setClickable(false);
+        card4.setClickable(false);
+        card3.setClickable(false);
+        card2.setClickable(false);
+        card1.setClickable(false);
+    }
+
+    private void flipTheRest(ImageButton imageButton, String reward){
+        if (reward.equals("DOLR")) {
+            imageButton.setImageResource(R.mipmap.ic_dollar_foreground);
+        } else if (reward.equals("PENY")) {
+            imageButton.setImageResource(R.mipmap.ic_peny_foreground);
+        } else if(reward.equals("QUID")){
+            imageButton.setImageResource(R.mipmap.ic_quid_foreground);
+        } else if (reward.equals("SHIL")){
+            imageButton.setImageResource(R.mipmap.ic_shilling_foreground);
+        } else if(reward.equals("AllCoins")){
+            imageButton.setImageResource(R.mipmap.ic_all_coins_foreground);
+        } else {
+            imageButton.setImageResource(R.mipmap.ic_no_coins_foreground);
         }
     }
 

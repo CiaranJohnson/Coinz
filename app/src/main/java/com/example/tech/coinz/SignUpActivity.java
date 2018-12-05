@@ -27,13 +27,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+
+import timber.log.Timber;
 
 public class SignUpActivity extends AppCompatActivity {
 
     private static final String TAG = "SignUpActivity";
 
+
     private MaterialEditText metEmail, metName, metPassword;
-    private Button btnSignUp, btnBack;
+    Button btnSignUp, btnBack;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -66,7 +70,9 @@ public class SignUpActivity extends AppCompatActivity {
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mAuth.createUserWithEmailAndPassword(metEmail.getText().toString(), metPassword.getText().toString()).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
+                String email = Objects.requireNonNull(metEmail.getText()).toString();
+                String password = Objects.requireNonNull(metPassword.getText()).toString();
+                mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
@@ -116,16 +122,20 @@ public class SignUpActivity extends AppCompatActivity {
                 if(user !=null){
                     Log.d(TAG, "user is not null");
                     UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                            .setDisplayName(metName.getText().toString()).build();
+                            .setDisplayName(Objects.requireNonNull(metName.getText()).toString()).build();
                     user.updateProfile(profileUpdates);
 
                     Map<String, Object> userInfo = new HashMap<>();
                     String displayName = metName.getText().toString();
                     Log.d(TAG, "name of user is " + displayName);
+                    Timber.d("name");
 
 
                     userInfo.put("UID", user.getUid());
-                    userInfo.put("Email", user.getEmail());
+                    if(user.getEmail() != null){
+                        userInfo.put("Email", user.getEmail());
+                    }
+
                     userInfo.put("DisplayName", displayName);
 
                     //Adds users info to the database aand if successful closes SignUp and starts MapActivity

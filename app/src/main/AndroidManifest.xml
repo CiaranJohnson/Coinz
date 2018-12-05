@@ -30,7 +30,6 @@
             android:name=".SendCoinsActivity"
             android:label="@string/title_activity_send_coins"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".AddFriendsActivity" />
         <activity android:name=".SelectUserActivity" />
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"

@@ -336,6 +336,7 @@ public class Backend {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(SelectUserActivity.TAG, "FriendRequests successfully moved to Friends.");
+
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -465,6 +466,7 @@ public class Backend {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(SelectUserActivity.TAG, "onSuccess: addCoinToBank");
+                        BankActivity.displayBankBalanced();
 
                     }
                 }).addOnFailureListener(new OnFailureListener() {

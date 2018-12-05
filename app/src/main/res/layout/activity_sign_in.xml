@@ -38,7 +38,7 @@
                 android:inputType="textPassword"
                 android:textColor="@color/white"
                 android:textColorHint="@color/white"
-                android:textSize="34dp"
+                android:textSize="20dp"
                 app:met_baseColor="@color/white"
                 app:met_floatingLabel="highlight"
                 app:met_maxCharacters="11"

@@ -18,8 +18,11 @@ import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class GameBackend {
+
+    private static final String TAG = "GameBackend";
 
     private static FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private static FirebaseUser currentUser = mAuth.getCurrentUser() ;
@@ -45,12 +48,16 @@ public class GameBackend {
                     Map<String, Object> coinInfo = doc.getData();
 
                     //Add the correct Coins to the Bank given the reward and delete all not being added to bank from SpareChange
-                    if(currency.equals("AllCoins")){
-                        addCoinToBank(coinInfo);
-                    }else if(coinInfo.get("Currency").toString().equals(currency)){
-                        addCoinToBank(coinInfo);
+                    if(coinInfo != null) {
+                        if (currency.equals("AllCoins")) {
+                            addCoinToBank(coinInfo);
+                        } else if (Objects.requireNonNull(coinInfo.get("Currency")).toString().equals(currency)) {
+                            addCoinToBank(coinInfo);
+                        } else {
+                            removeCoin(coinInfo);
+                        }
                     } else {
-                        removeCoin(coinInfo);
+                        Log.e(TAG, "coinInfo is null");
                     }
                 }
             }
@@ -61,7 +68,7 @@ public class GameBackend {
 
     private static void addCoinToBank(Map<String,Object> coinInfo) {
 
-        mCurrentUserRef.collection("Bank").document(coinInfo.get("ID").toString()).set(coinInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+        mCurrentUserRef.collection("Bank").document(Objects.requireNonNull(coinInfo.get("ID")).toString()).set(coinInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
 
@@ -78,8 +85,11 @@ public class GameBackend {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 Map<String, Object> rates = documentSnapshot.getData();
-                Double rate = Double.parseDouble(rates.get(coinInfo.get("Currency")).toString());
-                incrementBank(coinInfo, rate);
+                if(rates != null){
+                    Object currency = Objects.requireNonNull(coinInfo.get("Currency")).toString();
+                    Double rate = Double.parseDouble(Objects.requireNonNull(rates.get(currency)).toString());
+                    incrementBank(coinInfo, rate);
+                }
             }
         });
     }
@@ -91,17 +101,20 @@ public class GameBackend {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 Map<String, Object> bankTotal = documentSnapshot.getData();
-                Double bankBalance = Double.parseDouble(bankTotal.get("BankBalance").toString());
-                Double goldCoin = Double.parseDouble(coinInfo.get("Value").toString());
-                goldCoin *= rate;
+                if (bankTotal != null) {
+                    Double bankBalance = Double.parseDouble(Objects.requireNonNull(bankTotal.get("BankBalance")).toString());
+                    Double goldCoin = Double.parseDouble(Objects.requireNonNull(coinInfo.get("Value")).toString());
+                    goldCoin *= rate;
 
-                bankTotal.put("BankBalance", bankBalance + goldCoin);
-                docRef.set(bankTotal).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(GameActivity.TAG, "onSuccess: incrementBank");
-                    }
-                });
+                    bankTotal.put("BankBalance", bankBalance + goldCoin);
+                    docRef.set(bankTotal).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(GameActivity.TAG, "onSuccess: incrementBank");
+                        }
+                    });
+                }
+
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -112,7 +125,7 @@ public class GameBackend {
     }
 
     private static void removeCoin(Map<String, Object> coinInfo){
-        mCurrentUserRef.collection("CollectedCoins").document(coinInfo.get("ID").toString()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+        mCurrentUserRef.collection("CollectedCoins").document(Objects.requireNonNull(coinInfo.get("ID")).toString()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(SelectUserActivity.TAG, "onSuccess: removeCoin Successful");
