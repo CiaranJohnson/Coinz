@@ -47,12 +47,50 @@
 
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:layout_below="@id/bankLayout"
+
+
+    <LinearLayout
+        android:id="@+id/collectedCoinsList"
+        android:layout_below="@+id/bankLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/recycler_view">
-    </android.support.v7.widget.RecyclerView>
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/btnSingUp"
+            android:text="@string/collected"
+            android:textSize="20dp"/>
+        <android.support.v7.widget.RecyclerView
+            android:layout_below="@id/bankLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/recycler_view">
+        </android.support.v7.widget.RecyclerView>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/recievedCoinsList"
+        android:layout_below="@+id/collectedCoinsList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/btnSingUp"
+            android:text="@string/received"
+            android:textSize="20dp"/>
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/received_recycler_view">
+        </android.support.v7.widget.RecyclerView>
+
+    </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"

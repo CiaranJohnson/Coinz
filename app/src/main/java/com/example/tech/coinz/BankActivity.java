@@ -43,9 +43,14 @@ public class BankActivity extends AppCompatActivity {
     private static TextView balanceTxt;
 
     Map<String, Object> collectedCoin;
+    Map<String, Object> receivedCoin;
     ArrayList<String> currency;
     ArrayList<String> value;
     ArrayList<String> id;
+
+    ArrayList<String> receivedCurrency;
+    ArrayList<String> receivedValue;
+    ArrayList<String> receivedId;
 
 
     @Override
@@ -61,32 +66,38 @@ public class BankActivity extends AppCompatActivity {
         value = new ArrayList<>();
         id = new ArrayList<>();
 
+        receivedCurrency = new ArrayList<>();
+        receivedValue = new ArrayList<>();
+        receivedId = new ArrayList<>();
+
 
         mapBtn = (Button) findViewById(R.id.mapButton);
         balanceTxt = (TextView) findViewById(R.id.balanceTxt);
 
         displayBankBalanced();
 
+        getCollectedCoins();
+
         //Get all the Coins in Collected Coins and store the id, value and Currency as these will be used in the recycler view
 
-        db.collection("User").document(user.getUid()).collection("CollectedCoins").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-               List <DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
-               for (DocumentSnapshot doc: docs){
-                   collectedCoin = doc.getData();
-
-                   Log.d(TAG, "onSuccess: " + collectedCoin.get("Currency").toString());
-
-                   currency.add(Objects.requireNonNull(collectedCoin.get("Currency").toString()));
-                   value.add(Objects.requireNonNull(collectedCoin.get("Value")).toString());
-                   id.add(Objects.requireNonNull(collectedCoin.get("ID").toString()));
-
-               }
-
-               initRecyclerView();
-            }
-        });
+//        db.collection("User").document(user.getUid()).collection("CollectedCoins").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+//            @Override
+//            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+//               List <DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
+//               for (DocumentSnapshot doc: docs){
+//                   collectedCoin = doc.getData();
+//
+//                   Log.d(TAG, "onSuccess: " + collectedCoin.get("Currency").toString());
+//
+//                   currency.add(Objects.requireNonNull(collectedCoin.get("Currency").toString()));
+//                   value.add(Objects.requireNonNull(collectedCoin.get("Value")).toString());
+//                   id.add(Objects.requireNonNull(collectedCoin.get("ID").toString()));
+//
+//               }
+//
+//               initRecyclerView();
+//            }
+//        });
 
         mapBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,6 +109,55 @@ public class BankActivity extends AppCompatActivity {
 
 
 
+    }
+
+    private void getCollectedCoins(){
+        Log.d(TAG, "getCollectedCoins: ");
+        db.collection("User").document(user.getUid()).collection("CollectedCoins").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                Log.d(TAG, "onSuccess: heres");
+                List <DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
+                for (DocumentSnapshot doc: docs){
+                    collectedCoin = doc.getData();
+
+                    Log.d(TAG, "onSuccess: " + collectedCoin.get("Currency").toString());
+
+                    currency.add(Objects.requireNonNull(collectedCoin.get("Currency").toString()));
+                    value.add(Objects.requireNonNull(collectedCoin.get("Value")).toString());
+                    id.add(Objects.requireNonNull(collectedCoin.get("ID").toString()));
+
+                }
+
+                getReceivedCoins();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, "onFailure: ", e);
+            }
+        });
+    }
+
+    private void getReceivedCoins(){
+        db.collection("User").document(user.getUid()).collection("RecievedCoins").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                List <DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
+                for (DocumentSnapshot doc: docs){
+                    receivedCoin = doc.getData();
+
+                    Log.d(TAG, "onSuccess: " + receivedCoin.get("Currency").toString());
+
+                    receivedCurrency.add(Objects.requireNonNull(receivedCoin.get("Currency").toString()));
+                    receivedValue.add(Objects.requireNonNull(receivedCoin.get("Value")).toString());
+                    receivedId.add(Objects.requireNonNull(receivedCoin.get("ID").toString()));
+
+                }
+
+                initRecyclerView();
+            }
+        });
     }
 
     /**
@@ -136,6 +196,11 @@ public class BankActivity extends AppCompatActivity {
         RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(currency, value, id, this);
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        RecyclerView receivedView = findViewById(R.id.received_recycler_view);
+        ReceivedViewAdapter receivedViewAdapter = new ReceivedViewAdapter(receivedCurrency, receivedValue, receivedId, this);
+        receivedView.setAdapter(receivedViewAdapter);
+        receivedView.setLayoutManager(new LinearLayoutManager(this));
     }
 
 }

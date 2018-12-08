@@ -127,7 +127,7 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        mCurrentUserRef.collection("ReceivedCoins").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        mCurrentUserRef.collection("RecievedCoins").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 receivedTxt.setText(String.valueOf(queryDocumentSnapshots.getDocuments().size()));
@@ -148,6 +148,7 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ProfileActivity.this, SelectUserActivity.class);
+                intent.putExtra("sendScreen", false);
                 startActivity(intent);
             }
         });

@@ -2,7 +2,6 @@ package com.example.tech.coinz;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,25 +12,16 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-//import com.bumptech.glide.Glide;
-
-
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.ObjectStreamClass;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
+public class ReceivedViewAdapter extends RecyclerView.Adapter<ReceivedViewAdapter.ViewHolder> {
 
     private static final String TAG = "RecyclerViewAdapter";
 
@@ -47,7 +37,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private Double gold = 0.0;
     private Map<String, Object> userInformation = new HashMap<>();
 
-    public RecyclerViewAdapter(ArrayList<String> currency, ArrayList<String> values, ArrayList<String> id, Context mContext) {
+    public ReceivedViewAdapter(ArrayList<String> currency, ArrayList<String> values, ArrayList<String> id, Context mContext) {
         this.id = id;
         this.values = values;
         this.currency = currency;
@@ -56,14 +46,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.coin_list_item, parent, false);
-        ViewHolder holder = new ViewHolder(view);
+    public ReceivedViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.received_coin_item, parent, false);
+        ReceivedViewAdapter.ViewHolder holder = new ReceivedViewAdapter.ViewHolder(view);
         return holder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder viewHolder, final int position) {
+    public void onBindViewHolder(@NonNull ReceivedViewAdapter.ViewHolder viewHolder, final int position) {
         Log.d(TAG, "onBindViewHolder: called.");
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
@@ -83,17 +73,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             viewHolder.coinSymbol.setImageResource(R.drawable.shil_symbol);
         }
 
-        viewHolder.sendBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(mContext, SelectUserActivity.class);
-                intent.putExtra("Currency", currency.get(position));
-                intent.putExtra("Value", values.get(position));
-                intent.putExtra("ID", id.get(position));
-                intent.putExtra("sendScreen", true);
-                mContext.startActivity(intent);
-            }
-        });
 
         viewHolder.btnBank.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,7 +81,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 coinInfo.put("ID", id.get(position));
                 coinInfo.put("Currency", currency.get(position));
                 coinInfo.put("Value", values.get(position));
-                Backend.getBankCount(coinInfo, "CollectedCoins", mContext);
+                Backend.getBankCount(coinInfo, "RecievedCoins", mContext);
                 id.remove(position);
                 currency.remove(position);
                 values.remove(position);
@@ -123,7 +102,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         ImageView coinSymbol;
         TextView txtCurrency;
         TextView txtValue;
-        Button btnBank, sendBtn;
+        Button btnBank;
         RelativeLayout offerLayout;
 
         public ViewHolder(@NonNull View itemView) {
@@ -132,10 +111,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
             coinSymbol = (ImageView) itemView.findViewById(R.id.coinSymbol);
             btnBank = (Button) itemView.findViewById(R.id.btnBank);
-            sendBtn = (Button) itemView.findViewById(R.id.sendBtn);
             txtCurrency = (TextView) itemView.findViewById(R.id.txtCurrency);
             txtValue = (TextView) itemView.findViewById(R.id.txtValue);
             offerLayout = (RelativeLayout) itemView.findViewById(R.id.coin_layout);
         }
     }
+
+
 }

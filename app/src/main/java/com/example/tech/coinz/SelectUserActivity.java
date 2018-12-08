@@ -67,6 +67,7 @@ public class SelectUserActivity extends AppCompatActivity {
     private Map<String, Object> friendData;
 
     MaterialSearchView searchView;
+    Boolean sendScreen;
 
     private Dialog mDialog;
 
@@ -79,7 +80,7 @@ public class SelectUserActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_user);
         Log.d(TAG, "onCreate: has started.");
-
+        sendScreen = false;
 
         //initialise Firebase
         mAuth = FirebaseAuth.getInstance();
@@ -97,7 +98,12 @@ public class SelectUserActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         if(extras !=  null){
-            coinID = extras.getString("ID");
+            if (extras.getBoolean("sendScreen")){
+                coinID = extras.getString("ID");
+                sendScreen = true;
+            } else {
+                sendScreen = false;
+            }
         }
 
         initImageBitmap();
@@ -167,10 +173,18 @@ public class SelectUserActivity extends AppCompatActivity {
 
     private void initRecyclerView(){
         Log.d(TAG, "initRecyclerView: started");
-        RecyclerView friendRecyclerView = findViewById(R.id.friend_recycler_view);
-        FriendViewAdapter friendViewAdapter = new FriendViewAdapter(mUserID, mDisplayName,mEmail, coinID, this);
-        friendRecyclerView.setAdapter(friendViewAdapter);
-        friendRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        if (sendScreen){
+            RecyclerView friendRecyclerView = findViewById(R.id.friend_recycler_view);
+            FriendViewAdapter friendViewAdapter = new FriendViewAdapter(mUserID, mDisplayName,mEmail, coinID, this);
+            friendRecyclerView.setAdapter(friendViewAdapter);
+            friendRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        } else {
+            RecyclerView friendRecyclerView = findViewById(R.id.friend_recycler_view);
+            FriendListViewAdapter friendListViewAdapter = new FriendListViewAdapter(mUserID, mDisplayName,mEmail, coinID, this);
+            friendRecyclerView.setAdapter(friendListViewAdapter);
+            friendRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        }
+
 
         RecyclerView requestRecyclerView = findViewById(R.id.requests_recycler_view);
         FriendRequestViewAdapter requestViewAdapter = new FriendRequestViewAdapter(mRequestID, mRequestName,mRequestEmail, this);

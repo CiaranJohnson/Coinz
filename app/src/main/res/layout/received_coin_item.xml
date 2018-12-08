@@ -5,7 +5,7 @@
     android:layout_height="100dp"
     android:padding="15dp"
     android:background="@drawable/gradientbackground"
-    android:id="@+id/coin_layout">
+    android:id="@+id/received_coin_layout">
 
     <ImageView
         android:layout_width="100dp"
@@ -41,14 +41,7 @@
         android:layout_alignParentRight="true"
         android:id="@+id/btnBank"
         android:layout_centerVertical="true"/>
-    <Button
-        android:id="@+id/sendBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/Send"
-        android:layout_toLeftOf="@id/btnBank"
-        android:layout_centerVertical="true"
-        />
-    
+
+
 
 </RelativeLayout>

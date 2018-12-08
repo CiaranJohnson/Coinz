@@ -430,17 +430,22 @@ public class Backend {
         });
     }
 
-    public static void getBankCount(Map<String,Object> coinInfo, Context mContext){
+    public static void getBankCount(Map<String,Object> coinInfo, String coinType, Context mContext){
         mCurrentUserRef.collection("Bank").document("submittedCount").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 Log.d(SelectUserActivity.TAG, "onSuccess: getBankCount");
                 Map<String, Object> submittedCount= documentSnapshot.getData();
-                if(Integer.parseInt(submittedCount.get("SubmittedToday").toString())<25){
-                    addCoinToBank(coinInfo, Integer.parseInt(submittedCount.get("SubmittedToday").toString()));
+                if(coinType.equals("RecievedCoins")){
+                    addCoinToBank(coinInfo, Integer.parseInt(submittedCount.get("SubmittedToday").toString()), coinType);
                 } else {
-                    Toast.makeText(mContext, "Can't bank anymore today!", Toast.LENGTH_LONG).show();
+                    if(Integer.parseInt(submittedCount.get("SubmittedToday").toString())<25){
+                        addCoinToBank(coinInfo, Integer.parseInt(submittedCount.get("SubmittedToday").toString()) + 1, coinType);
+                    } else {
+                        Toast.makeText(mContext, "Can't bank anymore today!", Toast.LENGTH_LONG).show();
+                    }
                 }
+
 
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -451,15 +456,14 @@ public class Backend {
         });
     }
 
-    private static void addCoinToBank(Map<String,Object> coinInfo, int submitCount) {
-        final int count = submitCount +1;
+    private static void addCoinToBank(Map<String,Object> coinInfo, int submitCount, String coinType) {
         mCurrentUserRef.collection("Bank").document(coinInfo.get("ID").toString()).set(coinInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
 
-                removeCoin(coinInfo);
+                removeCoin(coinInfo, coinType);
                 Map<String, Object> submittedCount = new HashMap<>();
-                submittedCount.put("SubmittedToday", count);
+                submittedCount.put("SubmittedToday", submitCount);
                 getRate(coinInfo);
 
                 mCurrentUserRef.collection("Bank").document("submittedCount").set(submittedCount).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -478,8 +482,8 @@ public class Backend {
             }
         });
     }
-    private static void removeCoin(Map<String, Object> coinInfo){
-        mCurrentUserRef.collection("CollectedCoins").document(coinInfo.get("ID").toString()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+    private static void removeCoin(Map<String, Object> coinInfo, String coinType){
+        mCurrentUserRef.collection(coinType).document(coinInfo.get("ID").toString()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(SelectUserActivity.TAG, "onSuccess: removeCoin Successful");
