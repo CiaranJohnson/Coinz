@@ -1,6 +1,8 @@
 package com.example.tech.coinz;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,15 +19,13 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.auth.User;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -44,6 +44,9 @@ public class SignUpActivity extends AppCompatActivity {
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    private FirebaseStorage storage;
+    private StorageReference storageReference;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +54,9 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up);
 
         mAuth = FirebaseAuth.getInstance();
+
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
 
         btnSignUp = (Button) findViewById(R.id.signUpButton);
         btnBack = (Button) findViewById(R.id.backButton);
@@ -62,7 +68,7 @@ public class SignUpActivity extends AppCompatActivity {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
+                Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
                 startActivity(intent);
             }
         });
@@ -125,6 +131,7 @@ public class SignUpActivity extends AppCompatActivity {
                             .setDisplayName(Objects.requireNonNull(metName.getText()).toString()).build();
                     user.updateProfile(profileUpdates);
 
+
                     Map<String, Object> userInfo = new HashMap<>();
                     String displayName = metName.getText().toString();
                     Log.d(TAG, "name of user is " + displayName);
@@ -166,6 +173,25 @@ public class SignUpActivity extends AppCompatActivity {
         };
 
     }
+
+//    private void addDefaultProfilePic(FirebaseUser user){
+//
+//        StorageReference profileRef = storageReference.child("images/profile_picture/"+ user.getUid());
+//        Uri uri = Uri.parse("android.resource://com.example.tech.coinz/drawable/ic_person_outline_black_24dp");
+//        profileRef.putFile(uri).addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//                Log.d(TAG, "Error: Unsuccessful upload");
+//            }
+//        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//            @Override
+//            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                Log.d(TAG, "onSuccess: Added a default Profile Picture");
+//            }
+//        });
+//    }
+
+
 
 
 }

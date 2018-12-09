@@ -112,7 +112,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         if(mFirebaseUser == null) {
             Timber.d( "onCreate: no user");
             mapView.onDestroy();
-            Intent intent = new Intent(MapActivity.this, MainActivity.class);
+            Intent intent = new Intent(MapActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
             return;

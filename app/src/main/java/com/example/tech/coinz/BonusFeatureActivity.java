@@ -35,7 +35,7 @@ public class BonusFeatureActivity extends AppCompatActivity {
     ArrayList<Double> bankBalances;
     ArrayList<String> userEmails;
 
-    Button playBtn;
+    Button playBtn, mapBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,22 +63,22 @@ public class BonusFeatureActivity extends AppCompatActivity {
 
         getLeaderboard();
 
-//        db.collection("User").orderBy("BankBalance").limit(5).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-//            @Override
-//            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-//                Log.d(TAG, "onSuccess: " + queryDocumentSnapshots.getDocuments().get(0).getData().get("UID"));
-//                for(DocumentSnapshot doc: queryDocumentSnapshots.getDocuments()){
-//                    Log.d(TAG, "onSuccess:  documents" +doc.getData());
-//                }
-//            }
-//        });
 
         playBtn = (Button)findViewById(R.id.playBtn);
+        mapBtn = (Button) findViewById(R.id.mapBtn);
 
         playBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(BonusFeatureActivity.this, GameActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        mapBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(BonusFeatureActivity.this, MapActivity.class);
                 startActivity(intent);
             }
         });

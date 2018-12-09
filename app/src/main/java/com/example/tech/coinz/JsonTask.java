@@ -90,7 +90,7 @@ public class JsonTask extends AsyncTask<Void, Void, Void> {
 //        @Override
 //        protected void onPostExecute(Void result) {
 //            super.onPostExecute(result);
-//            ListAdapter adapter = new SimpleAdapter(MainActivity.this, contactList,
+//            ListAdapter adapter = new SimpleAdapter(LoginActivity.this, contactList,
 //                    R.layout.list_item, new String[]{ "email","mobile"},
 //                    new int[]{R.id.email, R.id.mobile});
 //            lv.setAdapter(adapter);

@@ -25,7 +25,7 @@ import static org.hamcrest.Matchers.allOf;
 public class SignInTest{
 
     @Rule
-    public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
+    public ActivityTestRule<LoginActivity> mActivityTestRule = new ActivityTestRule<>(LoginActivity.class);
 
     @Rule
     public GrantPermissionRule grantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION);
@@ -54,6 +54,12 @@ public class SignInTest{
                 allOf(withId(R.id.signInButton), withText(R.string.sign_in),
                         isDisplayed()));
         appCompatButton2.perform(click());
+
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         ViewInteraction appCompatButton3 = onView(
                 allOf(withId(R.id.ProfileBtn), withText(R.string.Profile),

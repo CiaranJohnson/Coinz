@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     Button signInBtn, signUpBtn;
 
@@ -18,12 +18,12 @@ public class MainActivity extends AppCompatActivity {
         signUpBtn = findViewById(R.id.btnSignUp);
 
         signUpBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, SignUpActivity.class);
+            Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
             startActivity(intent);
         });
 
         signInBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, SignInActivity.class);
+            Intent intent = new Intent(LoginActivity.this, SignInActivity.class);
             startActivity(intent);
         });
     }
