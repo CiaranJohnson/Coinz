@@ -24,6 +24,7 @@
     <string name="balance">Balance: </string>
     <string name="GambleText">Gamble with your SpareChange to increase your Bank Account.</string>
     <string name="Games">Games</string>
+    <string name="Play">Play</string>
 
 
     <string name="access_token" translatable="false">pk.eyJ1IjoiY2lhcmFuam9obnNvbiIsImEiOiJjam40aGYzbXgzajk5M3FvODBqZDJpc3c1In0.TzJCJOiNkogBl3JnHnh7Ew</string>
