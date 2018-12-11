@@ -193,16 +193,13 @@ public class SelectUserActivity extends AppCompatActivity {
     }
 
     private void firebaseSearch(String searchText){
-        db.collection("User").whereEqualTo("Email", searchText).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.isSuccessful()){
-                    if (task.getResult().getDocuments().size() == 0) {
-                        Toast.makeText(SelectUserActivity.this, "Sorry this User does not exist. Try again.", Toast.LENGTH_LONG).show();
-                    } else {
-                        Map<String, Object> userInformation = task.getResult().getDocuments().get(0).getData();
-                        checkDatabase(userInformation);
-                    }
+        db.collection("User").whereEqualTo("Email", searchText).get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                if (task.getResult().getDocuments().size() == 0) {
+                    Toast.makeText(SelectUserActivity.this, "Sorry this User does not exist. Try again.", Toast.LENGTH_LONG).show();
+                } else {
+                    Map<String, Object> userInformation = task.getResult().getDocuments().get(0).getData();
+                    checkDatabase(userInformation);
                 }
             }
         });
@@ -218,15 +215,17 @@ public class SelectUserActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                             if(queryDocumentSnapshots.getDocuments().size() == 0){
-                                viewUserInformation(userInfo, false);
+                                checkFriendRequests(userInfo, false);
+//                                viewUserInformation(userInfo, false);
                             } else {
-                                viewUserInformation(userInfo, true);
+                                checkFriendRequests(userInfo, true);
+//                                viewUserInformation(userInfo, true);
                             }
                         }
                     });
 
                 } else {
-                    viewUserInformation(userInfo, true);
+                    checkFriendRequests(userInfo, true);
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -237,7 +236,20 @@ public class SelectUserActivity extends AppCompatActivity {
         });
     }
 
-    private void viewUserInformation(Map<String,Object> userInformation, Boolean sent) {
+    private void checkFriendRequests(Map<String,Object> userInfo, boolean sent) {
+        mCurrentUserRef.collection("FriendRequests").whereEqualTo("UID", userInfo.get("UID")).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                if(queryDocumentSnapshots.getDocuments().size() == 0){
+                    viewUserInformation(userInfo, sent, false);
+                } else {
+                    viewUserInformation(userInfo, sent, true);
+                }
+            }
+        });
+    }
+
+    private void viewUserInformation(Map<String,Object> userInformation, Boolean sent, Boolean received) {
 
         mDialog.setContentView(R.layout.add_friend_popup);
         Button addFreindBtn = (Button) mDialog.findViewById(R.id.addFriendBtn);
@@ -248,8 +260,12 @@ public class SelectUserActivity extends AppCompatActivity {
         txtName.setText(userInformation.get("DisplayName").toString());
 
         if(sent){
-            addFreindBtn.setText("Sent");
+            addFreindBtn.setText(R.string.Sent);
             addFreindBtn.setClickable(false);
+        }
+
+        if(received){
+            addFreindBtn.setText(R.string.add);
         }
 
         closePopup.setOnClickListener(new View.OnClickListener() {
@@ -262,8 +278,13 @@ public class SelectUserActivity extends AppCompatActivity {
         addFreindBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Backend.sendRequest(userInformation);
-                addFreindBtn.setText("Sent");
+                if (addFreindBtn.getText().equals("Add")){
+                    Log.d(TAG, "onClick: add button");
+                    Backend.moveToFriends(userInformation);
+                } else{
+                    Backend.sendRequest(userInformation);
+                }
+                addFreindBtn.setText(R.string.Sent);
                 addFreindBtn.setClickable(false);
             }
         });

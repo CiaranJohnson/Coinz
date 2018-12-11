@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import com.mapbox.mapboxsdk.annotations.Icon;
 
@@ -68,8 +69,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private MapView mapView;
     private MapboxMap map;
     public Button GamesBtn, ProfileBtn, BankBtn;
-
-    private static final String URL_DATA = "http://homepages.inf.ed.ac.uk/stg/coinz/2019/12/31/coinzmap.geojson";
 
 
     // variables for adding location layer
@@ -87,7 +86,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private ArrayList<Marker> markers;
 
-    private String date;
 
 
 
@@ -102,7 +100,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_map);
 
 
-        mapView = (MapView) findViewById(R.id.mapView);
+        mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
@@ -120,27 +118,24 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
 
         markers = new ArrayList<>();
-        GamesBtn = (Button) findViewById(R.id.GamesBtn);
-        BankBtn = (Button) findViewById(R.id.BankBtn);
-        ProfileBtn = (Button) findViewById(R.id.ProfileBtn);
+        GamesBtn = findViewById(R.id.GamesBtn);
+        BankBtn = findViewById(R.id.BankBtn);
+        ProfileBtn = findViewById(R.id.ProfileBtn);
         mCurrentUserRef = db.collection("User").document(mFirebaseUser.getUid());
 
         String date = getDate();
-        Timber.d( "onCreate: the current date is:" + date);
+        Timber.d( "onCreate: the current date is:%s", date);
 
         db.collection("User").document(mFirebaseUser.getUid()).collection("Date")
-                .document("LastUsed").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Map<String, Object> dateInfo = documentSnapshot.getData();
-                if(dateInfo!= null){
-                    if(!date.equals(dateInfo.get("LastUpdated"))){
-                        Timber.d( "onSuccess: " + date);
-                        newDay(date);
+                .document("LastUsed").get().addOnSuccessListener(documentSnapshot -> {
+                    Map<String, Object> dateInfo = documentSnapshot.getData();
+                    if(dateInfo!= null){
+                        if(!date.equals(dateInfo.get("LastUpdated"))){
+                            Timber.d( "onSuccess: %s", date);
+                            newDay(date);
+                        }
                     }
-                }
-            }
-        });
+                });
 
 
 
@@ -149,20 +144,14 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             startActivity(intent);
         });
 
-        GamesBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MapActivity.this, BonusFeatureActivity.class);
-                startActivity(intent);
-            }
+        GamesBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(MapActivity.this, BonusFeatureActivity.class);
+            startActivity(intent);
         });
 
-        ProfileBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MapActivity.this, ProfileActivity.class);
-                startActivity(intent);
-            }
+        ProfileBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(MapActivity.this, ProfileActivity.class);
+            startActivity(intent);
         });
 
     }
@@ -182,7 +171,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
-        Log.d(TAG, "newDay: " + json);
+        Timber.d("newDay: %s", json);
 
         try {
             Backend.getExchangeRate(json);
@@ -198,37 +187,33 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void deleteOldMap(String json){
-        mCurrentUserRef.collection("Map").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                Log.d(TAG, "deleteOldMap: Successfully retrieved the old map");
-                if(queryDocumentSnapshots.getDocuments().size() > 0) {
-                    for (DocumentSnapshot doc:queryDocumentSnapshots.getDocuments()){
-                        doc.getReference().delete();
-                    }
+        mCurrentUserRef.collection("Map").get().addOnSuccessListener(queryDocumentSnapshots -> {
+            Timber.d("deleteOldMap: Successfully retrieved the old map");
+            if(queryDocumentSnapshots.getDocuments().size() > 0) {
+                for (DocumentSnapshot doc:queryDocumentSnapshots.getDocuments()){
+                    doc.getReference().delete();
                 }
-                getNewMap(json);
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, "deleteOldMap: " + e.getMessage());
-            }
-        });
+            getNewMap(json);
+        }).addOnFailureListener(e -> Timber.e("deleteOldMap: %s", e.getMessage()));
     }
 
 
     private void getNewMap(String json){
         FeatureCollection fc = FeatureCollection.fromJson(json);
-        List<Feature> features = (List<Feature>) fc.features();
+        List<Feature> features = fc.features();
         int counter = 0;
 
         if (features != null){
             for (Feature feature: features) {
                 Point point = (Point) feature.geometry();
-                List<Double> latlng = point.coordinates();
+                List<Double> latlng = null;
+                if (point != null) {
+                    latlng = point.coordinates();
+                }
                 JsonObject properties = feature.properties();
 
+                assert properties != null;
                 String id = properties.get("id").getAsString();
                 String value = properties.get("value").getAsString();
                 String currency = properties.get("currency").getAsString();
@@ -242,23 +227,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 coin.put("Currency", currency);
                 coin.put("MarkerSymbol", markerSymbol);
                 coin.put("MarkerColor", markerColor);
-                coin.put("Longitude", latlng.get(0));
+                coin.put("Longitude", Objects.requireNonNull(latlng).get(0));
                 coin.put("Latitude", latlng.get(1));
                 counter++;
-                int count = counter;
-                mCurrentUserRef.collection("Map").document(id).set(coin).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "onSuccess: Successfully added coin: " + id);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "onFailure: Failed to add coin: " + id + " due to " + e.getMessage());
-                    }
-                });
-                Log.d(TAG, "getNewMap: " + features.size());
-                Log.d(TAG, "getNewMap: " + counter);
+                mCurrentUserRef.collection("Map").document(id).set(coin).addOnSuccessListener(aVoid ->
+                        Timber.d("onSuccess: Successfully added coin: %s", id)
+                ).addOnFailureListener(e ->
+                        Timber.e("onFailure: Failed to add coin: " + id + " due to " + e.getMessage())
+                );
+                Timber.d("getNewMap: %s", features.size());
+                Timber.d("getNewMap: %s", counter);
                 if (counter == features.size()) {
                     addMarkersToMap();
                 }
@@ -277,7 +255,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         if(mapboxMap == null){
 
-            Log.d(TAG, "onMapReady: mapBox is null");
+            Timber.d("onMapReady: mapBox is null");
         } else {
 
             this.map = mapboxMap;
@@ -295,48 +273,40 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private void addMarkersToMap(){
         if(map == null){
-            Log.d(TAG, "addMarkersToMap: Map not ready yet");
+            Timber.d("addMarkersToMap: Map not ready yet");
         } else {
-            db.collection("User").document(mFirebaseUser.getUid()).collection("Map").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    for(DocumentSnapshot doc: queryDocumentSnapshots.getDocuments()){
-                        Map<String, Object> marker = doc.getData();
-                        LatLng latLng = new LatLng(Double.parseDouble(marker.get("Latitude").toString()),Double.parseDouble(marker.get("Longitude").toString()));
+            db.collection("User").document(mFirebaseUser.getUid()).collection("Map").get().addOnSuccessListener(queryDocumentSnapshots -> {
+                for(DocumentSnapshot doc: queryDocumentSnapshots.getDocuments()){
+                    Map<String, Object> marker = doc.getData();
+                    LatLng latLng = new LatLng(Double.parseDouble(marker.get("Latitude").toString()),Double.parseDouble(marker.get("Longitude").toString()));
 
 
-                        IconFactory iconFactory = IconFactory.getInstance(MapActivity.this);
+                    IconFactory iconFactory = IconFactory.getInstance(MapActivity.this);
 
 
-                        if(marker.get("Currency").equals("DOLR")){
+                    if(marker.get("Currency").equals("DOLR")){
 
-                            Icon icon = iconFactory.fromResource(R.mipmap.ic_dollar_foreground);
-                            markers.add(map.addMarker(new MarkerOptions().setPosition(latLng).setTitle(marker.get("ID").toString()).icon(icon)));
+                        Icon icon = iconFactory.fromResource(R.mipmap.ic_dollar_foreground);
+                        markers.add(map.addMarker(new MarkerOptions().setPosition(latLng).setTitle(Objects.requireNonNull(marker.get("ID")).toString()).icon(icon)));
 
-                        } else if(marker.get("Currency").equals("SHIL")){
+                    } else if(marker.get("Currency").equals("SHIL")){
 
-                            Icon icon = iconFactory.fromResource(R.mipmap.ic_shilling_foreground);
-                            markers.add(map.addMarker(new MarkerOptions().setPosition(latLng).setTitle(marker.get("ID").toString()).icon(icon)));
+                        Icon icon = iconFactory.fromResource(R.mipmap.ic_shilling_foreground);
+                        markers.add(map.addMarker(new MarkerOptions().setPosition(latLng).setTitle(Objects.requireNonNull(marker.get("ID")).toString()).icon(icon)));
 
-                        } else if(marker.get("Currency").equals("QUID")){
+                    } else if(Objects.equals(marker.get("Currency"), "QUID")){
 
-                            Icon icon = iconFactory.fromResource(R.mipmap.ic_quid_foreground);
-                            markers.add(map.addMarker(new MarkerOptions().setPosition(latLng).setTitle(marker.get("ID").toString()).icon(icon)));
+                        Icon icon = iconFactory.fromResource(R.mipmap.ic_quid_foreground);
+                        markers.add(map.addMarker(new MarkerOptions().setPosition(latLng).setTitle(Objects.requireNonNull(marker.get("ID")).toString()).icon(icon)));
 
-                        } else{
+                    } else{
 
-                            Icon icon = iconFactory.fromResource(R.mipmap.ic_peny_foreground);
-                            markers.add(map.addMarker(new MarkerOptions().setPosition(latLng).setTitle(marker.get("ID").toString()).icon(icon)));
-                        }
-
+                        Icon icon = iconFactory.fromResource(R.mipmap.ic_peny_foreground);
+                        markers.add(map.addMarker(new MarkerOptions().setPosition(latLng).setTitle(Objects.requireNonNull(marker.get("ID")).toString()).icon(icon)));
                     }
+
                 }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.e(TAG, "addMarkersToMap: Failed: " + e);
-                }
-            });
+            }).addOnFailureListener(e -> Log.e(TAG, "addMarkersToMap: Failed: " + e));
         }
     }
 
