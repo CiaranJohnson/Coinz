@@ -13,7 +13,7 @@
         android:layout_marginTop="10dp"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:text="X"
+        android:text="@string/x"
         android:textColor="@color/white"
         android:background="@drawable/circle_background"
         android:layout_gravity="end"
@@ -46,7 +46,7 @@
         android:id="@+id/addFriendBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add Friend"
+        android:text="@string/add_friend"
         android:layout_gravity="center"/>
 
 

@@ -1,6 +1,7 @@
 package com.example.tech.coinz;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -72,7 +73,8 @@ public class SelectUserActivity extends AppCompatActivity {
     private Dialog mDialog;
 
     private EditText edtSearch;
-    private ImageButton searchBtn;
+    ImageButton searchBtn;
+    Button backBtn;
 
 
     @Override
@@ -89,6 +91,7 @@ public class SelectUserActivity extends AppCompatActivity {
 
         searchBtn = (ImageButton) findViewById(R.id.searchBtn);
         edtSearch = (EditText) findViewById(R.id.searchTxt);
+        backBtn = findViewById(R.id.backBtn);
 
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
@@ -114,6 +117,14 @@ public class SelectUserActivity extends AppCompatActivity {
                 if(!edtSearch.getText().toString().equals(null)){
                     firebaseSearch(edtSearch.getText().toString());
                 }
+            }
+        });
+
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SelectUserActivity.this, ProfileActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -282,6 +293,7 @@ public class SelectUserActivity extends AppCompatActivity {
                     Log.d(TAG, "onClick: add button");
                     Backend.moveToFriends(userInformation);
                 } else{
+                    Log.d(TAG, "onClick: send Button");
                     Backend.sendRequest(userInformation);
                 }
                 addFreindBtn.setText(R.string.Sent);

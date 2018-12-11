@@ -100,23 +100,23 @@ public class SignUpTest {
         appCompatTextView2.perform(click());
 
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         ViewInteraction appCompatButton3 = onView(
-                allOf(withId(R.id.signInButton), withText(R.string.sign_in),
+                allOf(withId(R.id.btnSignIn), withText(R.string.sign_in),
                         isDisplayed()));
         appCompatButton3.perform(click());
 
         ViewInteraction appCompatEditText4 = onView(
-                allOf(withId(R.id.medtEmail),
+                allOf(withId(R.id.editEmail),
                         isDisplayed()));
         appCompatEditText4.perform(replaceText("user@gmail.com"), closeSoftKeyboard());
 
         ViewInteraction appCompatEditText5 = onView(
-                allOf(withId(R.id.medtPassword),
+                allOf(withId(R.id.editPassword),
                         isDisplayed()));
         appCompatEditText5.perform(replaceText("password"), closeSoftKeyboard());
 
@@ -125,11 +125,19 @@ public class SignUpTest {
                         isDisplayed()));
         appCompatButton4.perform(click());
 
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-//        ViewInteraction button = onView(
-//                allOf(withId(R.id.signInButton),
-//                        isDisplayed()));
-//        button.check(matches(isDisplayed()));
+
+        appCompatTextView.perform(click());
+
+
+        appCompatTextView2.perform(click());
     }
+
+
 
 }
