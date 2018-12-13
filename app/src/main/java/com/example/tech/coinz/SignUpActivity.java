@@ -1,8 +1,6 @@
 package com.example.tech.coinz;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,8 +10,6 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,7 +18,6 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import java.util.HashMap;
@@ -146,9 +141,9 @@ public class SignUpActivity extends AppCompatActivity {
                     userInfo.put("DisplayName", displayName);
 
                     //Adds users info to the database aand if successful closes SignUp and starts MapActivity
-                    Backend.addUserInfo(userInfo, user.getUid(), getApplicationContext(), TAG);
-                    Backend.changeBankBalance(0, getApplicationContext(), TAG);
-                    Backend.changeCoinsSubmitted(0, getApplicationContext(), TAG);
+                    Backend.addUserInfo(userInfo, user.getUid(), getApplicationContext());
+                    Backend.changeBankBalance(0, getApplicationContext());
+                    Backend.changeCoinsSubmitted(0, getApplicationContext());
 
                     UserInfo.userDisplayName = displayName;
                     UserInfo.userEmail = user.getEmail();

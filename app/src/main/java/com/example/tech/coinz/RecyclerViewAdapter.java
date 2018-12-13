@@ -102,7 +102,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 coinInfo.put("ID", id.get(position));
                 coinInfo.put("Currency", currency.get(position));
                 coinInfo.put("Value", values.get(position));
-                Backend.getBankCount(coinInfo, "CollectedCoins", mContext);
+                BankBackend.getBankCount(coinInfo, "CollectedCoins", mContext);
                 id.remove(position);
                 currency.remove(position);
                 values.remove(position);

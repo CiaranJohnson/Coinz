@@ -87,6 +87,7 @@ public class FriendRequestViewAdapter extends RecyclerView.Adapter<FriendRequest
         });
 
 
+        // Move friend from friendRequest and sentRequest to friends.
         viewHolder.addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,6 +96,7 @@ public class FriendRequestViewAdapter extends RecyclerView.Adapter<FriendRequest
                 userInfo.put("Email", email.get(position));
                 userInfo.put("DisplayName", displayName.get(position));
                 Backend.moveToFriends(userInfo);
+                Toast.makeText(mContext, "Friend added", Toast.LENGTH_LONG).show();
 
             }
         });

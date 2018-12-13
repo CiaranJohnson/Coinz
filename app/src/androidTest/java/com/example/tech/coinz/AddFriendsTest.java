@@ -108,47 +108,6 @@ public class AddFriendsTest {
                         isDisplayed()));
         appCompatButton4.perform(click());
 
-
-        appCompatButton1.perform(click());
-
-
-        appCompatEditText2.perform(replaceText("bob@gmail.com"), closeSoftKeyboard());
-
-        appCompatEditText1.perform(replaceText("bobbob"), closeSoftKeyboard());
-
-        appCompatButton2.perform(click());
-
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
-        appCompatButton3.perform(click());
-
-        profileFriendButton.perform(click());
-
-
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        ViewInteraction addButton = onView(
-                allOf(withId(R.id.addBtn), withText(R.string.add),
-                        isDisplayed()));
-        addButton.perform(click());
-
-
-
-        backButton.perform(click());
-
-
-        appCompatButton4.perform(click());
-
     }
-
 
 }

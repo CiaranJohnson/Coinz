@@ -174,13 +174,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         Timber.d("newDay: %s", json);
 
         try {
-            Backend.getExchangeRate(json);
+            BankBackend.getExchangeRate(json);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Backend.updateDate();
+        BankBackend.updateDate();
         deleteOldMap(json);
-        Backend.moveCoinsToSpareChange(TAG);
+        BankBackend.moveCoinsToSpareChange();
 
 
 
@@ -468,7 +468,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         if(marker.getPosition().distanceTo(userLatLng)<25){
             Log.d(TAG, "collectCoin: " + marker.getTitle());
             map.removeMarker(marker);
-            Backend.pickUpCoin(marker.getTitle(), TAG, getApplicationContext());
+            BankBackend.pickUpCoin(marker.getTitle(), getApplicationContext());
 
         }
     }

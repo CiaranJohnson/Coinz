@@ -81,7 +81,7 @@ public class ReceivedViewAdapter extends RecyclerView.Adapter<ReceivedViewAdapte
                 coinInfo.put("ID", id.get(position));
                 coinInfo.put("Currency", currency.get(position));
                 coinInfo.put("Value", values.get(position));
-                Backend.getBankCount(coinInfo, "RecievedCoins", mContext);
+                BankBackend.getBankCount(coinInfo, "RecievedCoins", mContext);
                 id.remove(position);
                 currency.remove(position);
                 values.remove(position);

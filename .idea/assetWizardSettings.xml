@@ -23,7 +23,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="scalingPercent" value="117" />
+                                                <entry key="scalingPercent" value="158" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -34,7 +34,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="scalingPercent" value="117" />
+                                                <entry key="scalingPercent" value="158" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -44,9 +44,9 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="backgroundImage" value="$USER_HOME$/Downloads/LogoMakr_4HIiE9.png" />
-                                      <entry key="foregroundImage" value="$USER_HOME$/Downloads/LogoMakr_4HIiE9.png" />
-                                      <entry key="outputName" value="ic_all_coins" />
+                                      <entry key="backgroundImage" value="$USER_HOME$/Downloads/LogoMakr_0L2Jme.png" />
+                                      <entry key="foregroundImage" value="$USER_HOME$/Downloads/LogoMakr_0L2Jme.png" />
+                                      <entry key="outputName" value="ic_login" />
                                     </map>
                                   </option>
                                 </PersistentState>

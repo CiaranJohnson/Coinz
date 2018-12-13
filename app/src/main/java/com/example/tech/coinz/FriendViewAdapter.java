@@ -97,7 +97,7 @@ public class FriendViewAdapter extends RecyclerView.Adapter<FriendViewAdapter.Vi
             public void onClick(View v) {
                 Toast.makeText(mContext, "Sent Coin", Toast.LENGTH_LONG).show();
                 if (coinID.length()>0){
-                    Backend.sendCoin(coinID, userID.get(position));
+                    BankBackend.sendCoin(coinID, userID.get(position));
                 }
 
             }
