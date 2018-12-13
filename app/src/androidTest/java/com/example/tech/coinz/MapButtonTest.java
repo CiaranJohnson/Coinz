@@ -20,6 +20,10 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
 
 
+/**
+ * These test to see if all the map buttons in different activities work as expected.
+ */
+
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class MapButtonTest {
