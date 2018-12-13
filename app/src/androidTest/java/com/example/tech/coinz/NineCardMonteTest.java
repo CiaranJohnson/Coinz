@@ -413,6 +413,194 @@ public class NineCardMonteTest {
 
     }
 
+    @Test
+    public void cardSevenTest() {
+
+
+        ViewInteraction appCompatButton1 = onView(
+                allOf(withId(R.id.btnSignIn), withText(R.string.sign_in),
+                        isDisplayed()));
+        appCompatButton1.perform(click());
+
+        ViewInteraction appCompatEditText2 = onView(
+                allOf(withId(R.id.editEmail),
+                        isDisplayed()));
+        appCompatEditText2.perform(replaceText("user@gmail.com"), closeSoftKeyboard());
+
+        ViewInteraction appCompatEditText1 = onView(
+                allOf(withId(R.id.editPassword),
+                        isDisplayed()));
+        appCompatEditText1.perform(replaceText("password"), closeSoftKeyboard());
+
+        ViewInteraction appCompatButton2 = onView(
+                allOf(withId(R.id.signInButton), withText(R.string.sign_in),
+                        isDisplayed()));
+        appCompatButton2.perform(click());
+
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ViewInteraction appCompatButton3 = onView(
+                allOf(withId(R.id.GamesBtn), withText(R.string.Games),
+                        isDisplayed()));
+        appCompatButton3.perform(click());
+
+        ViewInteraction playButton = onView(
+                allOf(withId(R.id.playBtn), withText(R.string.Play),
+                        isDisplayed()));
+        playButton.perform(click());
+
+        ViewInteraction pickCard = onView(
+                allOf(withId(R.id.card7),
+                        isDisplayed()));
+        pickCard.perform(click());
+
+        try {
+            Thread.sleep(6000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ViewInteraction profileButton = onView(
+                allOf(withId(R.id.ProfileBtn), withText(R.string.Profile),
+                        isDisplayed()));
+        profileButton.perform(click());
+
+        ViewInteraction appCompatButton4 = onView(
+                allOf(withId(R.id.signOutBtn), withText(R.string.sign_out),
+                        isDisplayed()));
+        appCompatButton4.perform(click());
+
+    }
+
+    @Test
+    public void cardEightTest() {
+
+
+        ViewInteraction appCompatButton1 = onView(
+                allOf(withId(R.id.btnSignIn), withText(R.string.sign_in),
+                        isDisplayed()));
+        appCompatButton1.perform(click());
+
+        ViewInteraction appCompatEditText2 = onView(
+                allOf(withId(R.id.editEmail),
+                        isDisplayed()));
+        appCompatEditText2.perform(replaceText("user@gmail.com"), closeSoftKeyboard());
+
+        ViewInteraction appCompatEditText1 = onView(
+                allOf(withId(R.id.editPassword),
+                        isDisplayed()));
+        appCompatEditText1.perform(replaceText("password"), closeSoftKeyboard());
+
+        ViewInteraction appCompatButton2 = onView(
+                allOf(withId(R.id.signInButton), withText(R.string.sign_in),
+                        isDisplayed()));
+        appCompatButton2.perform(click());
+
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ViewInteraction appCompatButton3 = onView(
+                allOf(withId(R.id.GamesBtn), withText(R.string.Games),
+                        isDisplayed()));
+        appCompatButton3.perform(click());
+
+        ViewInteraction playButton = onView(
+                allOf(withId(R.id.playBtn), withText(R.string.Play),
+                        isDisplayed()));
+        playButton.perform(click());
+
+        ViewInteraction pickCard = onView(
+                allOf(withId(R.id.card8),
+                        isDisplayed()));
+        pickCard.perform(click());
+
+        try {
+            Thread.sleep(6000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ViewInteraction profileButton = onView(
+                allOf(withId(R.id.ProfileBtn), withText(R.string.Profile),
+                        isDisplayed()));
+        profileButton.perform(click());
+
+        ViewInteraction appCompatButton4 = onView(
+                allOf(withId(R.id.signOutBtn), withText(R.string.sign_out),
+                        isDisplayed()));
+        appCompatButton4.perform(click());
+
+    }
+
+    @Test
+    public void cardNineTest() {
+
+
+        ViewInteraction appCompatButton1 = onView(
+                allOf(withId(R.id.btnSignIn), withText(R.string.sign_in),
+                        isDisplayed()));
+        appCompatButton1.perform(click());
+
+        ViewInteraction appCompatEditText2 = onView(
+                allOf(withId(R.id.editEmail),
+                        isDisplayed()));
+        appCompatEditText2.perform(replaceText("user@gmail.com"), closeSoftKeyboard());
+
+        ViewInteraction appCompatEditText1 = onView(
+                allOf(withId(R.id.editPassword),
+                        isDisplayed()));
+        appCompatEditText1.perform(replaceText("password"), closeSoftKeyboard());
+
+        ViewInteraction appCompatButton2 = onView(
+                allOf(withId(R.id.signInButton), withText(R.string.sign_in),
+                        isDisplayed()));
+        appCompatButton2.perform(click());
+
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ViewInteraction appCompatButton3 = onView(
+                allOf(withId(R.id.GamesBtn), withText(R.string.Games),
+                        isDisplayed()));
+        appCompatButton3.perform(click());
+
+        ViewInteraction playButton = onView(
+                allOf(withId(R.id.playBtn), withText(R.string.Play),
+                        isDisplayed()));
+        playButton.perform(click());
+
+        ViewInteraction pickCard = onView(
+                allOf(withId(R.id.card9),
+                        isDisplayed()));
+        pickCard.perform(click());
+
+        try {
+            Thread.sleep(6000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ViewInteraction profileButton = onView(
+                allOf(withId(R.id.ProfileBtn), withText(R.string.Profile),
+                        isDisplayed()));
+        profileButton.perform(click());
+
+        ViewInteraction appCompatButton4 = onView(
+                allOf(withId(R.id.signOutBtn), withText(R.string.sign_out),
+                        isDisplayed()));
+        appCompatButton4.perform(click());
+
+    }
 
 
 
